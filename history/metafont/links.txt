@@ -1,0 +1,5 @@
+* [Model based, synthetic and parametric] Type Generation Systems: https://web.archive.org/web/20010104101800/webcom.net/~nfhome/fontgen.htm
+  Puts METAFONT in context of other type-generation systems.
+
+
+
