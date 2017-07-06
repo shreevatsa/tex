@@ -40,4 +40,8 @@ So the idea is to show:
 
 user's .tex file (TeX/LaTeX, whatever) → macroless TeX → list of boxes and glue → rendered output (with dvisvgm)
 
-And we can go back and forth ("reverse debugging").
+And we can go back and forth ("reverse debugging"). (See also PythonTutor.com.)
+
+At the end of the "Literate Programming" article, Knuth hints at this:
+
+> there will be many ways to incorporate the WEB philosophy into a really effective programming environment. For example, it will be worthwhile to produce a unified system that does both tangling and compiling, instead of using separate programs as in Figure 1; and it will also be worthwhile to carry the unification one step further, so that run-time debugging as well as syntactic debugging can be done entirely in terms of the WEB source language. Furthermore, a WEB-like system could be designed to incorporate additional modularization, so that it would be easier to compile different parts of a program independently. The new generation of graphic workstations makes it desirable to display selected program sections on demand, [...] And so on [...]
