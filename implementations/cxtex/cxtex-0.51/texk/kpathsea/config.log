@@ -1,0 +1,243 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:738: checking for gcc
+configure:854: checking whether the C compiler (gcc  ) works
+configure:870: gcc -o conftest    conftest.c  1>&5
+configure:896: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:901: checking whether we are using GNU C
+configure:910: gcc -E conftest.c
+configure:929: checking whether gcc accepts -g
+configure:997: checking for a BSD compatible install
+configure:1052: checking whether ln -s works
+configure:1075: checking whether make sets ${MAKE}
+configure:1297: checking for Cygwin environment
+configure:1313: gcc -c -g -O2  conftest.c 1>&5
+configure: In function `main':
+configure:1309: error: `__CYGWIN32__' undeclared (first use in this function)
+configure:1309: error: (Each undeclared identifier is reported only once
+configure:1309: error: for each function it appears in.)
+configure: failed program was:
+#line 1302 "configure"
+#include "confdefs.h"
+
+int main() {
+
+#ifndef __CYGWIN__
+#define __CYGWIN__ __CYGWIN32__
+#endif
+return __CYGWIN__;
+; return 0; }
+configure:1330: checking for mingw32 environment
+configure:1342: gcc -c -g -O2  conftest.c 1>&5
+configure: In function `main':
+configure:1338: error: `__MINGW32__' undeclared (first use in this function)
+configure:1338: error: (Each undeclared identifier is reported only once
+configure:1338: error: for each function it appears in.)
+configure: failed program was:
+#line 1335 "configure"
+#include "confdefs.h"
+
+int main() {
+return __MINGW32__;
+; return 0; }
+configure:1359: checking how to run the C preprocessor
+configure:1380: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1514: checking host system type
+configure:1535: checking build system type
+configure:1564: checking for ld used by GCC
+configure:1632: checking if the linker (/usr/bin/ld) is GNU ld
+GNU ld version 2.14.90.0.7 20031029
+configure:1649: checking for /usr/bin/ld option to reload object files
+configure:1661: checking for BSD-compatible nm
+configure:1699: checking for a sed that does not truncate output
+configure:1783: checking how to recognise dependent libraries
+configure:1969: checking for object suffix
+configure:1975: gcc -c -g -O2  conftest.c 1>&5
+configure:1995: checking for executable suffix
+configure:2005: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:2036: checking command to parse /usr/bin/nm -B output
+configure:2119: gcc -c -g -O2  conftest.c 1>&5
+configure:2122: /usr/bin/nm -B conftest.o | sed -n -e 's/^.*[ ]\([ABCDGISTW][ABCDGISTW]*\)[ ][ ]*\(\)\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2\3 \3/p' > conftest.nm
+configure:2173: gcc -o conftest -g -O2   conftest.c conftstm.o 1>&5
+configure:2222: checking for dlfcn.h
+configure:2232: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:2401: checking for ranlib
+configure:2470: checking for strip
+configure:2717: checking for objdir
+configure:2748: checking for gcc option to produce PIC
+configure:2896: checking if gcc PIC flag -fPIC works
+configure:2910: gcc -c -g -O2 -fPIC -DPIC  conftest.c 1>&5
+configure:2966: checking if gcc static flag -static works
+configure:2981: gcc -o conftest -g -O2   -static conftest.c  1>&5
+configure:3012: checking if gcc supports -c -o file.o
+configure:3031: gcc -c -g -O2 -o out/conftest2.o  conftest.c 1>&5
+configure:3060: checking if gcc supports -c -o file.lo
+configure:3078: gcc -c -g -O2 -c -o conftest.lo  conftest.c 1>&5
+configure:3136: checking if gcc supports -fno-rtti -fno-exceptions
+configure:3149: gcc -c -g -O2 -fno-rtti -fno-exceptions -c conftest.c  conftest.c 1>&5
+cc1: warning: "-fno-rtti" is valid for C++ but not for C/ObjC
+cc1: warning: "-fno-rtti" is valid for C++ but not for C/ObjC
+configure:3180: checking whether the linker (/usr/bin/ld) supports shared libraries
+configure:3883: checking how to hardcode library paths into programs
+configure:3915: checking whether stripping libraries is possible
+configure:3933: checking dynamic linker characteristics
+configure:4361: checking if libtool supports shared libraries
+configure:4369: checking whether to build shared libraries
+configure:4396: checking whether to build static libraries
+configure:4936: checking whether -lc should be explicitly linked in
+configure:4943: gcc -c -g -O2  conftest.c 1>&5
+configure:4956: gcc -shared conftest.o  -v -Wl,-soname -Wl,conftest -o conftest 2>&1 | grep  -lc  >/dev/null 2>&1
+configure:5552: checking for dirent.h that defines DIR
+configure:5565: gcc -c -g -O2  conftest.c 1>&5
+configure:5590: checking for opendir in -ldir
+configure:5609: gcc -o conftest -g -O2   conftest.c -ldir   1>&5
+/usr/bin/ld: cannot find -ldir
+collect2: ld returned 1 exit status
+configure: failed program was:
+#line 5598 "configure"
+#include "confdefs.h"
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char opendir();
+
+int main() {
+opendir()
+; return 0; }
+configure:5673: checking for ANSI C header files
+configure:5686: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5753: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:5777: checking whether closedir returns void
+configure:5791: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:5818: checking for assert.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for float.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for limits.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for memory.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for pwd.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for stdlib.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for string.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for sys/param.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5818: checking for unistd.h
+configure:5828: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:5858: checking for putenv
+configure:5886: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:5914: checking for strcasecmp
+configure:5942: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:5970: checking for strtol
+configure:5998: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6026: checking for strstr
+configure:6054: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6038: warning: conflicting types for built-in function `strstr'
+configure:6084: checking for bcmp
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `bcmp'
+configure:6084: checking for bcopy
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6084: checking for bzero
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `bzero'
+configure:6084: checking for getcwd
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6084: checking for getwd
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+/home/taco/tmp/cc2MF82P.o(.text+0x9): In function `main':
+/opt/Projects/Internal/ptanc/current/texk/kpathsea/configure:6106: warning: the `getwd' function is dangerous and should not be used.
+configure:6084: checking for index
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `index'
+configure:6084: checking for memcmp
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `memcmp'
+configure:6084: checking for memcpy
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `memcpy'
+configure:6084: checking for rindex
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `rindex'
+configure:6084: checking for strchr
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `strchr'
+configure:6084: checking for strrchr
+configure:6112: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6096: warning: conflicting types for built-in function `strrchr'
+configure:6138: checking for working const
+configure:6192: gcc -c -g -O2  conftest.c 1>&5
+configure:6215: checking whether the compiler accepts prototypes
+configure:6227: gcc -c -g -O2  conftest.c 1>&5
+configure:6248: checking whether program_invocation_name is predefined
+configure:6260: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6284: checking whether putenv uses malloc
+configure:6346: gcc -o conftest -g -O2   conftest.c  1>&5
+configure: failed program was:
+#line 6292 "configure"
+#include "confdefs.h"
+
+#define VAR	"YOW_VAR"
+#define STRING1 "GabbaGabbaHey"
+#define STRING2 "Yow!!"		/* should be shorter than STRING1 */
+extern char *getenv (); /* in case char* and int don't mix gracefully */
+extern char *malloc (); /* ditto */
+main ()
+{
+  char *str1, *rstr1, *str2, *rstr2;
+  str1 = getenv (VAR);
+  if (str1)
+    exit (1);
+  str1 = malloc (strlen (VAR) + 1 + strlen (STRING1) + 1);
+  if (str1 == 0)
+    exit (2);
+  strcpy (str1, VAR);
+  strcat (str1, "=");
+  strcat (str1, STRING1);
+  if (putenv (str1) < 0)
+    exit (3);
+  rstr1 = getenv (VAR);
+  if (rstr1 == 0)
+    exit (4);
+  rstr1 -= strlen (VAR) + 1;
+  if (strncmp (rstr1, VAR, strlen (VAR)))
+    exit (5);
+  str2 = malloc (strlen (VAR) + 1 + strlen (STRING2) + 1);
+  if (str2 == 0 || str1 == str2)
+    exit (6);
+  strcpy (str2, VAR);
+  strcat (str2, "=");
+  strcat (str2, STRING2);
+  if (putenv (str2) < 0)
+    exit (7);
+  rstr2 = getenv (VAR);
+  if (rstr2 == 0)
+    exit (8);
+  rstr2 -= strlen (VAR) + 1;
+#if 0
+  printf ("rstr1=0x%x, rstr2=0x%x\n", rstr1, rstr2);
+  /*
+   * If string from first call was reused for the second call,
+   * you had better not do a free on the first string!
+   */
+  if (rstr1 == rstr2)
+          printf ("#define SMART_PUTENV\n");
+  else
+          printf ("#undef SMART_PUTENV\n");
+#endif
+  exit (rstr1 == rstr2 ? 0 : 1);
+}
+configure:6370: checking whether getcwd uses fork or vfork
+configure:6390: gcc -o conftest -g -O2   conftest.c  1>&5
+configure:6415: checking whether to enable maintainer-specific portions of Makefiles
+configure:6434: checking for loader (symbol LD)
+configure:6448: checking for archiver (symbol AR)
+configure:6462: checking for archiver options (symbol ARFLAGS)
+configure:6538: checking host system type
+configure:6570: checking where the main texmf tree is located
+configure:6663: checking for main in -lm
+configure:6678: gcc -o conftest -g -O2   conftest.c -lm   1>&5

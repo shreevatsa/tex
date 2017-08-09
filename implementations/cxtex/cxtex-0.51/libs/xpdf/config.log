@@ -1,0 +1,36 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:575: checking for gcc
+configure:691: checking whether the C compiler (gcc  ) works
+configure:707: gcc -o conftest    conftest.c  1>&5
+configure:733: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:738: checking whether we are using GNU C
+configure:766: checking whether gcc accepts -g
+configure:800: checking for ranlib
+configure:835: checking for c++
+configure:868: checking whether the C++ compiler (c++  ) works
+configure:884: c++ -o conftest    conftest.C  1>&5
+configure:910: checking whether the C++ compiler (c++  ) is a cross-compiler
+configure:915: checking whether we are using GNU C++
+configure:943: checking whether c++ accepts -g
+configure:980: checking for c++
+configure:1013: checking whether the C++ compiler (c++  ) works
+configure:1029: c++ -o conftest    conftest.C  1>&5
+configure:1055: checking whether the C++ compiler (c++  ) is a cross-compiler
+configure:1060: checking whether we are using GNU C++
+configure:1088: checking whether c++ accepts -g
+configure:1131: checking for dirent.h that defines DIR
+configure:1169: checking for opendir in -ldir
+configure:1255: checking for popen
+configure:1255: checking for mkstemps
+configure:1310: checking for fseek64
+configure:1366: checking for ftell64
+configure:1437: checking for mkstemp
+configure:1470: checking for mkstemps
+configure:1505: checking whether to enable maintainer-specific portions of Makefiles
+configure:1524: checking for loader (symbol LD)
+configure:1538: checking for archiver (symbol AR)
+configure:1552: checking for archiver options (symbol ARFLAGS)
+configure:1628: checking host system type
+configure:1660: checking where the main texmf tree is located

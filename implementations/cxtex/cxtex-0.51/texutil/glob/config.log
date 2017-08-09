@@ -1,0 +1,22 @@
+This file contains any messages produced by compilers while
+running configure, to aid debugging if configure makes a mistake.
+
+configure:601: gcc -E conftest.c
+configure:715: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:783: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:779:26: minix/config.h: No such file or directory
+configure:893: gcc -c -g -O  conftest.c 1>&5
+configure:925: gcc -o conftest -g -O   conftest.c  1>&5
+configure:951: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1016: gcc -o conftest -g -O   conftest.c  1>&5
+configure:1048: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1048: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1048: gcc -E  conftest.c >/dev/null 2>conftest.out
+configure:1090: gcc -c -g -O  conftest.c 1>&5
+configure:1129: gcc -o conftest -g -O   conftest.c -ldir   1>&5
+d:\minGW\bin\..\lib\gcc-lib\mingw32\3.2.3\..\..\..\..\mingw32\bin\ld.exe: cannot find -ldir
+configure:1198: gcc -o conftest -g -O   conftest.c  1>&5
+configure:1231: gcc -o conftest -g -O   conftest.c  1>&5
+configure:1224:20: alloca.h: No such file or directory
+configure:1279: gcc -o conftest -g -O   conftest.c  1>&5
+configure:1451: gcc -o conftest -g -O   conftest.c  1>&5
