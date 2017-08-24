@@ -11,6 +11,8 @@ NULL = -268435455
 MACRO = 5
 CS_TOKEN_FLAG = 4095 # 07777
 
+expand_call_stack = []
+
 def safe_chr(x):
     ret = chr(x)
     assert ord(ret) in list(range(32, 127))
@@ -41,9 +43,9 @@ def printCs(p):
     """print_cs, module 262. zprintcs in tex0.c"""
     # gdb.execute('p zprintcs(%s)' % p)
     ACTIVE_BASE = 1 # Module 222
-    SINGLE_BASE = 257 
+    SINGLE_BASE = 257
     NULL_CS = 513
-    HASH_BASE = 514 
+    HASH_BASE = 514
     HASH_SIZE = 2100 # Probably changes in e-TeX!!
     FROZEN_CONTROL_SEQUENCE = HASH_BASE + HASH_SIZE
     FROZEN_NULL_FONT = FROZEN_CONTROL_SEQUENCE + 10
@@ -65,7 +67,7 @@ def printCs(p):
         # assert p <= UNDEFINED_CONTROL_SEQUENCE, ('p <= UNDEFINED_CONTROL_SEQUENCE', p, UNDEFINED_CONTROL_SEQUENCE)
         assert text(p) >= 0 and text(p) <= gdb.parse_and_eval('strptr'), 'text(p) >= 0 etc.'
         return gettexstring(text(p))
-        
+
 
 def showToken(t):
     # Module 293
@@ -79,6 +81,7 @@ def showToken(t):
 
 
 def showTokenList(start, loc):
+    """Module 292"""
     p = start
     token_strs = []
     while p != NULL:
@@ -117,9 +120,9 @@ def printInStateRecord(x):
              ' TokenListType: %s,' % tokenListType +
              ' StartNode: %s,' % startNode +
              ' CurrentNodeLoc: %s,' % currentNodeLoc +
-             ' => %s, ' % token_list_str + 
+             ' => [%s], ' % token_list_str +
              ' ParamStart: %s,' % x['limitfield'] +
-             ' WhereInEqtb: %s' % x['namefield'])
+             ' WhereInEqtb: %s>' % x['namefield'])
     else:
         start = int(x['startfield'])
         limit = int(x['limitfield'])
@@ -131,24 +134,73 @@ def printInStateRecord(x):
         to_read = ''.join(safe_chr(gdb.parse_and_eval('buffer[%d]' % i)) for i in range(loc, limit + 1))
         s = ('<ScannerState: %s,' % int(x['statefield']) +
              ' Index: %s,' % int(x['indexfield']) +
-             ' BufferPositions: %s to %s,' % (start, limit) + 
+             ' BufferPositions: %s to %s,' % (start, limit) +
              ' Loc: %s,' % x['locfield'] +
-             ' => %s | %s' % (already_read, to_read) + 
-             ' FileName: %s="%s"' % (x['namefield'], gettexstring(x['namefield'])))
+             ' => %s | %s' % (already_read, to_read) +
+             ' FileName: %s="%s">' % (x['namefield'], gettexstring(x['namefield'])))
     print(s)
 
-class MyBreakpoint(gdb.Breakpoint):
+def dump_context():
+    for i in range(int(gdb.parse_and_eval('inputptr'))):
+        printInStateRecord(gdb.parse_and_eval('inputstack[%d]' % i))
+    printInStateRecord(gdb.parse_and_eval('curinput'))
+
+class BpExpand(gdb.Breakpoint):
     def stop (self):
-        gdb.write('\nMyBreakpoint\n')
-        x = gdb.parse_and_eval('curinput')
-        for i in range(int(gdb.parse_and_eval('inputptr'))):
-            printInStateRecord(gdb.parse_and_eval('inputstack[%d]' % i))
-        printInStateRecord(x)
-        # out.write('hello\n')
+        gdb.write('\n expand function called\n')
+        expand_call_stack.append('(')
+        # dump_context()
+        # TODO Really sorry, but I can't figure out how else to set breakpoint just before returning
+        # BpExpandFinishing('tex0.c:6976', temporary=True)
+        # BpExpandFinish()
+        # # From https://stackoverflow.com/a/31264709/4958
+        # frame = gdb.selected_frame()
+        # # TODO make this work if there is no debugging information, where .block() fails.
+        # block = frame.block()
+        # # Find the function block in case we are in an inner block.
+        # while block:
+        #     if block.function:
+        #         break
+        #     block = block.superblock
+        # start = block.start
+        # end = block.end
+        # arch = frame.architecture()
+        # pc = gdb.selected_frame().pc()
+        # instructions = arch.disassemble(start, end - 1)
+        # for instruction in instructions:
+        #     if instruction['asm'].startswith('retq '):
+        #         BpExpandFinishing('*{}'.format(instruction['addr']), temporary=True)
         return False
 
-MyBreakpoint('tex0.c:expand')
+class BpExpandStartOrEnd(gdb.Breakpoint):
+    def stop(self):
+        if expand_call_stack[-1] == '(':
+            expand_call_stack.append('|')
+            gdb.write('\n expand function entering\n')
+        else:
+            assert expand_call_stack[-1] == '|'
+            expand_call_stack.pop()
+            assert expand_call_stack[-1] == '('
+            expand_call_stack.pop()
+            gdb.write('\n expand function exiting\n')
+        return False
+
+class BpExpandFinish(gdb.FinishBreakpoint):
+    def stop(self):
+        gdb.write('\n expand finished\n')
+        dump_context()
+        return False
+
+class BpExpandFinishing(gdb.Breakpoint):
+    def stop(self):
+        gdb.write('\n expand finishing\n')
+        dump_context()
+        return False
+
+BpExpand('tex0.c:expand')
+BpExpandStartOrEnd('expanddepthcount', type=gdb.BP_WATCHPOINT)
 gdb.execute('set pagination off')
 gdb.execute('run')
 # out.close()
+assert not expand_call_stack, expand_call_stack
 gdb.execute('quit')
