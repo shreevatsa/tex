@@ -147,29 +147,8 @@ def dump_context():
 
 class BpExpand(gdb.Breakpoint):
     def stop (self):
-        gdb.write('\n expand function called\n')
+        # gdb.write('\n expand function called\n')
         expand_call_stack.append('(')
-        # dump_context()
-        # TODO Really sorry, but I can't figure out how else to set breakpoint just before returning
-        # BpExpandFinishing('tex0.c:6976', temporary=True)
-        # BpExpandFinish()
-        # # From https://stackoverflow.com/a/31264709/4958
-        # frame = gdb.selected_frame()
-        # # TODO make this work if there is no debugging information, where .block() fails.
-        # block = frame.block()
-        # # Find the function block in case we are in an inner block.
-        # while block:
-        #     if block.function:
-        #         break
-        #     block = block.superblock
-        # start = block.start
-        # end = block.end
-        # arch = frame.architecture()
-        # pc = gdb.selected_frame().pc()
-        # instructions = arch.disassemble(start, end - 1)
-        # for instruction in instructions:
-        #     if instruction['asm'].startswith('retq '):
-        #         BpExpandFinishing('*{}'.format(instruction['addr']), temporary=True)
         return False
 
 class BpExpandStartOrEnd(gdb.Breakpoint):
@@ -183,17 +162,6 @@ class BpExpandStartOrEnd(gdb.Breakpoint):
             assert expand_call_stack[-1] == '('
             expand_call_stack.pop()
             gdb.write('\n expand function exiting\n')
-        return False
-
-class BpExpandFinish(gdb.FinishBreakpoint):
-    def stop(self):
-        gdb.write('\n expand finished\n')
-        dump_context()
-        return False
-
-class BpExpandFinishing(gdb.Breakpoint):
-    def stop(self):
-        gdb.write('\n expand finishing\n')
         dump_context()
         return False
 
