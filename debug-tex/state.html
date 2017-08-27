@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
   <meta charset="utf-8"/>
+  <script src="vue.js"></script>
 </head>
 <body>
 <!--
@@ -63,7 +64,7 @@ On the right (main area):
     <td rowspan=2>1</td>
     <td class="statefield1">scanner state: MID_LINE</td>
     <td class="indexfield1">open-files depth: (reading from terminal)</td>
-    <td class="startfield1" colspan=3 id="replace1"></td>
+    <td class="startfield1" colspan=3 id="replace1" v-html="replace1Html"></td>
     <td class= "namefield1">filename: (reading from terminal)</td>
   </tr>
   <tr class="values">
@@ -91,6 +92,75 @@ On the right (main area):
     <td class= "namefield1">2039</td>
   </tr>
 
+
+  <tr class="meanings">
+    <td rowspan=2>3</td>
+    <td class="statefield2">token list</td>
+    <td class="indexfield2">token list type: 3 (= backed up)</td>
+    <td class="startfield2" colspan=2 id="replace3"><tt><table border=1><tr><td>(11, 97=a)</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
+    <td class="limitfield2">(ignore, not a macro)</td>
+    <td class= "namefield2">(ignore, not a macro)</td>
+  </tr>
+  <tr class="values">
+    <td class="statefield1">0</td>
+    <td class="indexfield1">3</td>
+    <td class="startfield1">4995122</td>
+    <td class=  "locfield1">4995122</td>
+    <td class="limitfield1">59</td>
+    <td class= "namefield1">2039</td>
+  </tr>
+
+  <tr class="meanings">
+    <td rowspan=2>4</td>
+    <td class="statefield2">token list</td>
+    <td class="indexfield2">token list type: 3 (= backed up)</td>
+    <td class="startfield2" colspan=2 id="replace4"><tt><table border=1><tr><td>(1, 123={)</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
+    <td class="limitfield2">(ignore, not a macro)</td>
+    <td class= "namefield2">(ignore, not a macro)</td>
+  </tr>
+  <tr class="values">
+    <td class="statefield1">0</td>
+    <td class="indexfield1">3</td>
+    <td class="startfield1">4995121</td>
+    <td class=  "locfield1">4995121</td>
+    <td class="limitfield1">59</td>
+    <td class= "namefield1">2039</td>
+  </tr>
+
+  <tr class="meanings">
+    <td rowspan=2>5</td>
+    <td class="statefield2">token list</td>
+    <td class="indexfield2">token list type: 3 (= backed up)</td>
+    <td class="startfield2" colspan=2 id="replace5"><tt><table border=1><tr><td>(ControlSequence, \uppercase)</td></tr><tr><td></td><td align=center>↑</td></tr></table></tt></td>
+    <td class="limitfield2">(ignore, not a macro)</td>
+    <td class= "namefield2">(ignore, not a macro)</td>
+  </tr>
+  <tr class="values">
+    <td class="statefield1">0</td>
+    <td class="indexfield1">3</td>
+    <td class="startfield1">4995120</td>
+    <td class=  "locfield1">NULL</td>
+    <td class="limitfield1">59</td>
+    <td class= "namefield1">2039</td>
+  </tr>
+
+  <tr class="meanings">
+    <td rowspan=2>6</td>
+    <td class="statefield2">token list</td>
+    <td class="indexfield2">token list type: 4 (= inserted)</td>
+    <td class="startfield2" colspan=2 id="replace6"><tt><table border=1><tr><td>\</td><td>u</td><td>p</td><td>p</td><td>e</td><td>r</td><td>c</td><td>a</td><td>s</td><td>e</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
+    <td class="limitfield2">(ignore, not a macro)</td>
+    <td class= "namefield2">(ignore, not a macro)</td>
+  </tr>
+  <tr class="values">
+    <td class="statefield1">0</td>
+    <td class="indexfield1">4</td>
+    <td class="startfield1">4995119</td>
+    <td class=  "locfield1">4995119</td>
+    <td class="limitfield1">59</td>
+    <td class= "namefield1">2039</td>
+  </tr>
+</table>
 
 <script type='text/javascript' src="helper.js">
 </script>

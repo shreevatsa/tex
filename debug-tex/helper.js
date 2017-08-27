@@ -1,5 +1,5 @@
 function makeTableFromBuffer(text, start, loc, limit) {
-    let inner = '<table><tr>';
+    let inner = '<table border=1><tr>';
     for (let c of text) {
 	inner += '<td>' + c + '</td>';
     }
@@ -18,8 +18,15 @@ function makeTableFromBuffer(text, start, loc, limit) {
 }
 
 function update() {
-    document.getElementById('replace1').appendChild(makeTableFromBuffer('expandafter.tex', 1, 17, 15));
+    // document.getElementById('replace1').appendChild(makeTableFromBuffer('expandafter.tex', 1, 17, 15));
     document.getElementById('replace2').appendChild(makeTableFromBuffer('\\expandafter\\uppercase\\expandafter{a}%', 17, 57, 58));
 }
 
 update();
+
+var app = new Vue({
+  el: '#replace1',
+  data: {
+      replace1Html: makeTableFromBuffer('expandafter.tex', 1, 17, 15).outerHTML,
+  }
+});
