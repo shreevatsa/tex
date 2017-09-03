@@ -59,14 +59,15 @@ On the right (main area):
 
 -->
 
-<table border=1>
+<table border=1 id="full-table">
   <tr class="meanings">
     <td rowspan=2>1</td>
     <td class="statefield1">scanner state: MID_LINE</td>
     <td class="indexfield1">open-files depth: (reading from terminal)</td>
-    <td class="startfield1" colspan=3 id="replace1" v-html="replace1Html"></td>
+    <td class="startfield1" colspan=3><div is="buffer-table" text="expandafter.tex" start=1 loc=17 limit=15></div></td>
     <td class= "namefield1">filename: (reading from terminal)</td>
   </tr>
+
   <tr class="values">
     <td class="statefield1">1</td>
     <td class="indexfield1">0</td>
@@ -80,7 +81,7 @@ On the right (main area):
     <td rowspan=2>2</td>
     <td class="statefield1">scanner state: MID_LINE</td>
     <td class="indexfield1">open-files depth: 1</td>
-    <td class="startfield1" colspan=3 id="replace2"></td>
+    <td class="startfield1" colspan=3><div is="buffer-table" text="\expandafter\uppercase\expandafter{a}%" start=17 loc=57 limit=58></div></td>
     <td class= "namefield1">filename: <tt>expandafter.tex</tt></td>
   </tr>
   <tr class="values">
@@ -148,7 +149,9 @@ On the right (main area):
     <td rowspan=2>6</td>
     <td class="statefield2">token list</td>
     <td class="indexfield2">token list type: 4 (= inserted)</td>
-    <td class="startfield2" colspan=2 id="replace6"><tt><table border=1><tr><td>\</td><td>u</td><td>p</td><td>p</td><td>e</td><td>r</td><td>c</td><td>a</td><td>s</td><td>e</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
+    <td class="startfield2" colspan=2 id="replace6"><div is="buffer-table" text="\uppercase" start=
+
+<tt><table border=1><tr><td>\</td><td>u</td><td>p</td><td>p</td><td>e</td><td>r</td><td>c</td><td>a</td><td>s</td><td>e</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
     <td class="limitfield2">(ignore, not a macro)</td>
     <td class= "namefield2">(ignore, not a macro)</td>
   </tr>
