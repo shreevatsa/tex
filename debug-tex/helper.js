@@ -1,29 +1,20 @@
-function makeTableFromBuffer(text, start, loc, limit) {
-    let inner = '<table border=1><tr>';
-    for (let c of text) {
-        inner += '<td>' + c + '</td>';
-    }
-    inner += '</tr>';
-    inner += '<tr><td colspan=';
-    inner += loc - start;
-    inner += '>';
-    inner += '<td>↑</td>';
-    inner += '</tr>';
-    inner += '</table>';
-
-    return inner;
-}
-
 // Make sure to get https://vuejs.org/js/vue.js and load it first
+Vue.component('buffer-table-row-one', {
+    props: ['textc'],
+    template: '<tr><td v-for="c of textc">{{c}}</td></tr>',
+});
+Vue.component('buffer-table-row-two', {
+    props: ['start', 'loc', 'limit'],
+    computed: {
+        colspant: function() {
+            return this.loc - this.start;
+        },
+    },
+    template: '<tr><td :colspan="colspant"></td><td>↑</td></tr>',
+});
 Vue.component('buffer-table', {
     props: ['text', 'start', 'loc', 'limit'],
-    render: function(createElement) {
-        return createElement('tt', {
-            domProps: {
-                innerHTML: makeTableFromBuffer(this.text, this.start, this.loc, this.limit),
-            },
-        });
-    }
+    template: '<tt><table border=1><buffer-table-row-one :textc="text"/><buffer-table-row-two :start="start" :loc="loc" :limit="limit"/></table></tt>',
 });
 
 var app = new Vue({
