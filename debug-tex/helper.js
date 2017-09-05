@@ -17,8 +17,22 @@ Vue.component('buffer-table', {
     template: '<tt><table border=1><buffer-table-row-one :textc="text"/><buffer-table-row-two :start="start" :loc="loc" :limit="limit"/></table></tt>',
 });
 
+Vue.component('input-state-raw-values', {
+    props: ['statefield', 'indexfield', 'startfield', 'locfield', 'limitfield', 'namefield'],
+    template: `<tr class="values">
+    <td class="statefield1">{{statefield}}</td>
+    <td class="indexfield1">{{indexfield}}</td>
+    <td class="startfield1">{{startfield}}</td>
+    <td class=  "locfield1">{{locfield}}</td>
+    <td class="limitfield1">{{limitfield}}</td>
+    <td class= "namefield1">{{namefield}}</td>
+  </tr>`,
+});
+
 var app = new Vue({
   el: '#full-table',
   data: {
   }
 });
+
+// Vue.config.productionTip = false;
