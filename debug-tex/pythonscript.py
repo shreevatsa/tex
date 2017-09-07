@@ -1,97 +1,142 @@
+"""
+Script for controlling a gdb process that is running tex, and dumping data about tex's workings.
+
+Guiding principle:
+Generate data, not formatting.
+- Do nothing related to presenting the information in a useful way on the terminal.
+- Optimize for usable consumption of data by another program.
+- If the interpretation of data can be done by another program, then leave it to that program.
+- If the interpretation of data *requires* further data that is available only via gdb and not in *TeX: The Program* (or even web2c sources/output), then dump that too.
+
+"""
+
 from __future__ import division
+from __future__ import print_function
+import json
 
 # TEX_BINARY = '/home/shreevatsa/build-tex/texlive/full/Master/bin/x86_64-linux/tex'
 # TEX_INPUT = '/home/shreevatsa/debug-tex/expandafter.tex'
 # COMMAND = '%s %s' % (TEX_BINARY, TEX_INPUT)
 # gdb.execute(COMMAND)
 
-# out = open('py-gdb-output.txt', 'w')
+out = open('py-gdb-output.txt', 'w')
+out.write('dumped_from_gdb = ')  # A hack!
+to_be_written_out = []
 
-NULL = -268435455
-MACRO = 5
-CS_TOKEN_FLAG = 4095 # 07777
+# Used in showTokenList
+NULL = -268435455  # TeX in §115 defines it as min_halfword which in §110 is defined as 0, but in web2c it's -0xFFFFFFF = -2^28 + 1.
 
+# Used in printInStateRecord, to decide how to call showTokenList
+MACRO = 5          # Token type, defined in §307
+
+# Used in showToken to decide whether something is a "simple" token or needs printCs
+CS_TOKEN_FLAG = 4095 # 07777 = 0xfff = 2^12-1, defined in §289
+
+# The command codes are defined in §207–§210
+
+# Some state for tracking how many times the `expand` procedure has been (recursively) called -- don't know if there's an easier way in gdb
 expand_call_stack = []
 
-def safe_chr(x):
-    ret = chr(x)
-    assert ord(ret) in list(range(32, 127))
-    return ret
+def ret_json(func):
+    def real(*args, **kwargs):
+        ret = func(*args, **kwargs)
+        try:
+            assert ret == json.loads(json.dumps(ret)), func
+            return ret
+        except:
+            print('Could not serialize ', ret, ' when returning ', func)
+            return ''
+    return real
 
+@ret_json
 def gettexstring(n):
-    # Calling the program's function would be more accurate in face of Aleph, XeTeX etc., but it malloc-s, so I'm unsure...
+    """Turns a 'string number' in tex into an actual string of characters."""
     # return gdb.parse_and_eval('gettexstring(%s)' % n)
-    if n == 0:
-        return ''
+    # ^ Calling the program's function would be more accurate, as a different function is compiled in the case of Aleph, XeTeX etc.
+    # But that function malloc-s, so I'm hesitant to call it here, as it may alter program behaviour.
     start = int(gdb.parse_and_eval('strstart[%d]' % n))
     end = int(gdb.parse_and_eval('strstart[%d]' % (n + 1)))
-    return ''.join(chr(gdb.parse_and_eval('strpool[%d]' % i)) for i in range(start, end))
+    return [int(gdb.parse_and_eval('strpool[%d]' % i)) for i in range(start, end)]
 
 def link(node):
-    # Replacement for TeX define: link (#) ≡ mem[#].hh.rh
+    # Replacement for TeX define in §118: link(#) ≡ mem[#].hh.rh
     return gdb.parse_and_eval('mem[%s].hh.v.RH' % node)
 
 def info(node):
-    # Another TeX define: info (#) ≡ mem[#].hh.lh
+    # Replacement for TeX define in §118: info(#) ≡ mem[#].hh.lh
     return gdb.parse_and_eval('mem[%s].hh.v.LH' % node)
 
 def text(node):
-    # Module 256: text (#) ≡ hash[#].rh { string number for control sequence name }
+    # Replacement for TeX define in §256: text(#) ≡ hash[#].rh { string number for control sequence name }
     return gdb.parse_and_eval('hash[%s].v.RH' % node)
 
+@ret_json
 def printCs(p):
-    """print_cs, module 262. zprintcs in tex0.c"""
+    """print_cs, module §262 = zprintcs in tex0.c { prints a purported control sequence }
+
+    Currently returns one of:
+      {'active_character': [char]}
+      {'control_sequence': [char]}
+      {'control_sequence': []}
+      {'control_sequence': [char, char, ...]}
+"""
     # gdb.execute('p zprintcs(%s)' % p)
-    ACTIVE_BASE = 1 # Module 222
-    SINGLE_BASE = 257
-    NULL_CS = 513
-    HASH_BASE = 514
-    HASH_SIZE = 2100 # Probably changes in e-TeX!!
-    FROZEN_CONTROL_SEQUENCE = HASH_BASE + HASH_SIZE
-    FROZEN_NULL_FONT = FROZEN_CONTROL_SEQUENCE + 10
-    UNDEFINED_CONTROL_SEQUENCE = FROZEN_NULL_FONT + 257
-    if p < HASH_BASE:
-        # Single character
+    HASH_SIZE = 2100  # Defined in §12, probably changes in e-TeX!!
+    ACTIVE_BASE = 1                                     # §222
+    SINGLE_BASE = 257                                   # §222
+    NULL_CS = 513                                       # §222
+    HASH_BASE = 514                                     # §222
+    FROZEN_CONTROL_SEQUENCE = HASH_BASE + HASH_SIZE     # §222
+    FROZEN_NULL_FONT = FROZEN_CONTROL_SEQUENCE + 10     # §222
+    UNDEFINED_CONTROL_SEQUENCE = FROZEN_NULL_FONT + 257 # §222
+    if p < HASH_BASE:  # Single character
         if p >= SINGLE_BASE:
+            # A single-character control sequence, like \a
             if p == NULL_CS:
-                return '<EMPTY CONTROL SEQUENCE>'
+                return {'control_sequence': []}
             else:
                 ret = gettexstring(p - SINGLE_BASE)
-                # if cat_code(p - SINGLE_BASE) == letter: ret += ' '
-                return ret
+                return {'control_sequence': ret}
         else:
+            # A single-character active character, like ~
             assert p >= ACTIVE_BASE, 'p >= ACTIVE_BASE'
-            return gettexstring(p - ACTIVE_BASE)
-    else:
-        # Changed in one of the change files, probably tex-final.ch :-(
+            ret = gettexstring(p - ACTIVE_BASE)
+            return {'active_character': ret}
+    else:  # Not a single character
         # assert p <= UNDEFINED_CONTROL_SEQUENCE, ('p <= UNDEFINED_CONTROL_SEQUENCE', p, UNDEFINED_CONTROL_SEQUENCE)
+        # ^ Changed in one of the change files, probably tex-final.ch :-(
         assert text(p) >= 0 and text(p) <= gdb.parse_and_eval('strptr'), 'text(p) >= 0 etc.'
-        return gettexstring(text(p))
+        return {'control_sequence': gettexstring(text(p))}
 
+@ret_json
+def showToken(p):
+    """Module §293 ⟨Display token p⟩
 
-def showToken(t):
-    # Module 293
-    assert t == int(t)
-    if t >= CS_TOKEN_FLAG:
-        # print('Printing control sequence for %d which is greater than %d' % (t, CS_TOKEN_FLAG))
-        return r'ControlSequence \%s' % printCs(t - CS_TOKEN_FLAG)
-    m = t // 256 # 0400
-    c = t % 256 # 0400
-    return 'Token (%d,%d%s)' % (m, c, '=' + chr(c) if c > 0 else '')
+    Returns either {'noncsToken': [m, c]} or one of the possible return values of printCs."""
+    if p < gdb.parse_and_eval('himemmin') or p > gdb.parse_and_eval('memend'):
+        assert False, 'CLOBBERED: %s' % p
+    t = int(info(p))
+    assert t >= 0
+    if t >= CS_TOKEN_FLAG:  # CS_TOKEN_FLAG is defined in §289
+        return printCs(t - CS_TOKEN_FLAG)
+    (m, c) = (t // 256, t % 256)
+    return {'noncsToken': [m, c]}
 
-
+@ret_json
 def showTokenList(start, loc):
-    """Module 292"""
-    p = start
-    token_strs = []
-    while p != NULL:
-        if p < gdb.parse_and_eval('himemmin') or p > gdb.parse_and_eval('memend'):
-            assert False, 'CLOBBERED: %s' % p
-        token_strs.append(showToken(int(info(p))))
-        p = link(p)
-    return ', '.join(token_strs)
+    """Module §292 { prints a symbolic form of the token list that starts at a given node p }
 
+    `start` is `p` in the TeX program, and `loc` is `q` and we're not currently using it."""
+    p = start
+    tokens = []
+    while p != NULL:
+        tokens.append(showToken(p))
+        p = link(p)
+    return tokens
+
+@ret_json
 def printInStateRecord(x):
+    """Prints an 'instaterecord' (input state record) -- the state of input at a given level of the input stack."""
     # print(x)
     assert type(x) == gdb.Value
     assert str(x.type) == 'instaterecord'
@@ -112,56 +157,65 @@ def printInStateRecord(x):
     state = int(x['statefield'])
     assert state in {TOKEN_LIST, MID_LINE, SKIP_BLANKS, NEW_LINE}, 'Unexpected state: %s' % state
     if state == TOKEN_LIST:
-        tokenListType = int(x['indexfield'])
         startNode = x['startfield']
-        currentNodeLoc = x['locfield']
-        token_list_str = showTokenList(startNode, currentNodeLoc) if tokenListType < MACRO else showTokenList(link(startNode), currentNodeLoc)
-        s = ('<TokenList.' +
-             ' TokenListType: %s,' % tokenListType +
-             ' StartNode: %s,' % startNode +
-             ' CurrentNodeLoc: %s,' % currentNodeLoc +
-             ' => [%s], ' % token_list_str +
-             ' ParamStart: %s,' % x['limitfield'] +
-             ' WhereInEqtb: %s>' % x['namefield'])
+        tokenList = showTokenList(startNode if x['indexfield'] < MACRO else link(startNode), x['locfield'])
+        return {                                  # See §307 for an explanation of these
+            'statefield': int(x['statefield']),   # is just going to be 0, indicating this is a token list
+            'indexfield': int(x['indexfield']),   # tokenListType
+            'startfield': int(x['startfield']),   # startNode
+              'locfield': int(x['locfield']),     # currentNodeLoc
+            'limitfield': int(x['limitfield']),   # where params start, if MACRO
+             'namefield': int(x['namefield']),    # where in eqtb, if MACRO
+                'tokens': tokenList,              # the actual tokens in the token list!
+        }
     else:
         start = int(x['startfield'])
         limit = int(x['limitfield'])
-        loc = int(x['locfield'])
-        # TODO: Deal with buffer[loc] being end_line_char (which is 13 = \r, quite annoying)
-        if chr(gdb.parse_and_eval('buffer[%d]' % limit)) == '\r':
-            limit -= 1
-        already_read = ''.join(safe_chr(gdb.parse_and_eval('buffer[%d]' % i)) for i in range(start, min(loc, limit + 1)))
-        to_read = ''.join(safe_chr(gdb.parse_and_eval('buffer[%d]' % i)) for i in range(loc, limit + 1))
-        s = ('<ScannerState: %s,' % int(x['statefield']) +
-             ' Index: %s,' % int(x['indexfield']) +
-             ' BufferPositions: %s to %s,' % (start, limit) +
-             ' Loc: %s,' % x['locfield'] +
-             ' => %s | %s' % (already_read, to_read) +
-             ' FileName: %s="%s">' % (x['namefield'], gettexstring(x['namefield'])))
-    print(s)
+        buffer_slice = [int(gdb.parse_and_eval('buffer[%d]' % i)) for i in range(start, limit + 1)]
+        return {                                # See §303 for an explanation of these
+            'statefield': int(x['statefield']), # Scanner state
+            'indexfield': int(x['indexfield']), # Index (files open depth)
+            'startfield': int(x['startfield']), # where current line starts in buffer
+              'locfield': int(x['locfield']),   # next char to read in buffer (or > limit meaning buffer is read)
+            'limitfield': int(x['limitfield']), # where current line ends in buffer
+             'namefield': int(x['namefield']),  # file name
+              'filename': gettexstring(x['namefield']),
+            'buffertext': buffer_slice,
+        }
+
 
 def dump_context():
+    context = []
     for i in range(int(gdb.parse_and_eval('inputptr'))):
-        printInStateRecord(gdb.parse_and_eval('inputstack[%d]' % i))
-    printInStateRecord(gdb.parse_and_eval('curinput'))
+        context.append(printInStateRecord(gdb.parse_and_eval('inputstack[%d]' % i)))
+    context.append(printInStateRecord(gdb.parse_and_eval('curinput')))
+    try:
+        assert json.loads(json.dumps(context)) == context
+        to_be_written_out.append(context)
+    except:
+        print('Could not serialize context: ')
+        for c in context:
+            print(c)
 
 class BpExpand(gdb.Breakpoint):
-    def stop (self):
+    """A Breakpoint to be set on the expand function."""
+    def stop(self):
         # gdb.write('\n expand function called\n')
         expand_call_stack.append('(')
         return False
 
 class BpExpandStartOrEnd(gdb.Breakpoint):
+    """A Watchpoint to be set on the 'expanddepthcount' variable (tracking function expand() enter and exit)."""
     def stop(self):
         if expand_call_stack[-1] == '(':
+            # gdb.write('\n expand function entering\n')
             expand_call_stack.append('|')
-            gdb.write('\n expand function entering\n')
         else:
             assert expand_call_stack[-1] == '|'
             expand_call_stack.pop()
             assert expand_call_stack[-1] == '('
             expand_call_stack.pop()
-            gdb.write('\n expand function exiting\n')
+            # gdb.write('\n expand function exiting\n')
         dump_context()
         return False
 
@@ -169,6 +223,7 @@ BpExpand('tex0.c:expand')
 BpExpandStartOrEnd('expanddepthcount', type=gdb.BP_WATCHPOINT)
 gdb.execute('set pagination off')
 gdb.execute('run')
-# out.close()
+json.dump(to_be_written_out, out)
+out.close()
 assert not expand_call_stack, expand_call_stack
 gdb.execute('quit')

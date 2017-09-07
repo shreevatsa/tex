@@ -2,8 +2,14 @@
 <head>
   <meta charset="utf-8"/>
   <script src="vue.js"></script>
+  <script src="py-gdb-output.txt"></script>
 </head>
 <body>
+<script type="text/javascript">
+console.log(dumped_from_gdb[0]);
+</script>
+
+<div id="body">
 <!--
 How to display something like:
 
@@ -50,65 +56,27 @@ On the right (main area):
       >
 -->
 
-<table border=1 id="full-table">
-  <tr class="meanings">
-    <td rowspan=2>1</td>
-    <td class="statefield1">scanner state: MID_LINE</td>
-    <td class="indexfield1">open-files depth: (reading from terminal)</td>
-    <td class="startfield1" colspan=3><div is="buffer-table" text="expandafter.tex" start=1 loc=17 limit=15></div></td>
-    <td class= "namefield1">filename: (reading from terminal)</td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=1 indexfield=0 startfield=1 locfield=17 limitfield=16 namefield=0></tr>
-
-  <tr class="meanings">
-    <td rowspan=2>2</td>
-    <td class="statefield1">scanner state: MID_LINE</td>
-    <td class="indexfield1">open-files depth: 1</td>
-    <td class="startfield1" colspan=3><div is="buffer-table" text="\expandafter\uppercase\expandafter{a}%" start=17 loc=57 limit=58></div></td>
-    <td class= "namefield1">filename: <tt>expandafter.tex</tt></td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=1 indexfield=1 startfield=17 locfield=58 limitfield=57 namefield=2039></tr>
-
-  <tr class="meanings">
-    <td rowspan=2>3</td>
-    <td class="statefield2">token list</td>
-    <td class="indexfield2">token list type: 3 (= backed up)</td>
-    <td class="startfield2" colspan=2 id="replace3"><tt><table border=1><tr><td>(11, 97=a)</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
-    <td class="limitfield2">(ignore, not a macro)</td>
-    <td class= "namefield2">(ignore, not a macro)</td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=0 indexfield=3 startfield=4995122 locfield=4995122 limitfield=59 namefield=2039></tr>
-
-  <tr class="meanings">
-    <td rowspan=2>4</td>
-    <td class="statefield2">token list</td>
-    <td class="indexfield2">token list type: 3 (= backed up)</td>
-    <td class="startfield2" colspan=2 id="replace4"><tt><table border=1><tr><td>(1, 123={)</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
-    <td class="limitfield2">(ignore, not a macro)</td>
-    <td class= "namefield2">(ignore, not a macro)</td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=0 indexfield=3 startfield=4995121 locfield=4995121 limitfield=59 namefield=2039></tr>
-
-  <tr class="meanings">
-    <td rowspan=2>5</td>
-    <td class="statefield2">token list</td>
-    <td class="indexfield2">token list type: 3 (= backed up)</td>
-    <td class="startfield2" colspan=2 id="replace5"><tt><table border=1><tr><td>(ControlSequence, \uppercase)</td></tr><tr><td></td><td align=center>↑</td></tr></table></tt></td>
-    <td class="limitfield2">(ignore, not a macro)</td>
-    <td class= "namefield2">(ignore, not a macro)</td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=0 indexfield=3 startfield=4995120 locfield=NULL limitfield=59 namefield=2039></tr>
-
-  <tr class="meanings">
-    <td rowspan=2>6</td>
-    <td class="statefield2">token list</td>
-    <td class="indexfield2">token list type: 4 (= inserted)</td>
-    <td class="startfield2" colspan=2 id="replace6"><tt><table border=1><tr><td>\</td><td>u</td><td>p</td><td>p</td><td>e</td><td>r</td><td>c</td><td>a</td><td>s</td><td>e</td></tr><tr><td align=center>↑</td></tr></table></tt></td>
-    <td class="limitfield2">(ignore, not a macro)</td>
-    <td class= "namefield2">(ignore, not a macro)</td>
-  </tr>
-  <tr is="input-state-raw-values" statefield=0 indexfield=4 startfield=4995119 locfield=4995119 limitfield=59 namefield=2039></tr>
+<table border=1 id="full-table-1">
+ <tbody is="input-state-record" rownumber=1 :instaterecord="{statefield:1, indexfield:0, startfield:1, locfield:17, limitfield:16, namefield:0, buffertext:'expandafter.tex'}" ></tbody>
 </table>
+
+<table border=100></table>
+
+<input-state :instaterecords='[{"limitfield":16,"filename":[94,94,64],"indexfield":0,"statefield":1,"locfield":17,"startfield":1,"namefield":0,"buffertext":[101,120,112,97,110,100,97,102,116,101,114,46,116,101,120,13]},{"limitfield":62,"filename":[101,120,112,97,110,100,97,102,116,101,114,46,116,101,120],"indexfield":1,"statefield":17,"locfield":29,"startfield":17,"namefield":2031,"buffertext":[92,101,120,112,97,110,100,97,102,116,101,114,92,101,120,112,97,110,100,97,102,116,101,114,92,101,120,112,97,110,100,97,102,116,101,114,92,109,101,97,110,105,110,103,37,13]}]'></input-state>
+
+<table border=50></table>
+
+<table border=1 id="full-table-2">
+ <tbody is="input-state-row" rownumber=1 statefield=1 indexfield=0 startfield=1 locfield=17 limitfield=16 namefield=0 text="expandafter.tex"></tbody>
+ <tbody is="input-state-row" rownumber=2 statefield=1 indexfield=1 startfield=17 locfield=58 limitfield=57 namefield=2039 text="\expandafter\uppercase\expandafter{a}%"></tbody>
+ <tbody is="input-state-row" rownumber=3 statefield=0 indexfield=3 startfield=49995122 locfield=4995122 limitfield=59 namefield=2039 :tokens="[[11,97]]"></tbody>
+ <tbody is="input-state-row" rownumber=4 statefield=0 indexfield=3 startfield=49995121 locfield=4995121 limitfield=59 namefield=2039 :tokens="[[1,123]]"></tbody>
+ <tbody is="input-state-row" rownumber=5 statefield=0 indexfield=3 startfield=49995120 locfield=NULL limitfield=59 namefield=2039
+        :tokens="[['ControlSequence', '\\uppercase']]"></tbody>
+ <tbody is="input-state-row" rownumber=6 statefield=0 indexfield=4 startfield=49995119 locfield=4995119 limitfield=59 namefield=2039
+        :tokens="[[12, 92], [12, 117], [12, 112], [12, 112], [12, 101], [12, 114], [12, 99], [12, 97], [12, 115], [12, 101]]"></tbody>
+</table>
+</div>
 
 <script type='text/javascript' src="helper.js">
 </script>
