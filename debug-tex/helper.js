@@ -1,7 +1,16 @@
+function strFromArray(arr) {
+    let s = '';
+    for (let c of arr) {
+        s += String.fromCharCode(c);
+    };
+    return s;
+}
+
+
 // Make sure to get https://vuejs.org/js/vue.js and load it first
 Vue.component('buffer-table-row-one', {
     props: ['textc'],
-    template: '<tr><td v-for="c of textc">{{c}}</td></tr>',
+    template: '<tr><td v-for="c of textc"><span :title="c">{{c == 32 ? "&nbsp;" : String.fromCharCode(c)}}</span></td></tr>',
 });
 Vue.component('buffer-table-row-two', {
     props: ['start', 'loc', 'limit'],
@@ -10,7 +19,7 @@ Vue.component('buffer-table-row-two', {
             return this.loc - this.start;
         },
     },
-    template: '<tr><td :colspan="colspant" v-if="colspant > 0"></td><td>↑</td></tr>',
+    template: '<tr><td :colspan="colspant" v-if="colspant > 0"></td><td align="center">↑</td></tr>',
 });
 Vue.component('buffer-table', {
     props: ['text', 'start', 'loc', 'limit'],
@@ -18,10 +27,23 @@ Vue.component('buffer-table', {
 });
 
 
+Vue.component('single-token', {
+    props: ['token'],
+    methods: {
+        strFromArray: strFromArray,
+    },
+    template: `
+      <span v-if="'noncsToken' in token" :title="token.noncsToken[0]">{{String.fromCharCode(token.noncsToken[1])}}<sub>{{token.noncsToken[0]}}</sub></span>
+      <span v-else-if="'active_character' in token" title="active character">{{strFromArray(token.active_character)}}</span>
+      <span v-else-if="'control_sequence' in token" title="control sequence">\\{{strFromArray(token.control_sequence)}}</span>
+      <span v-else :title="token">Unknown token type {{token}} with keys {{token.keys()}} like {{token.keys()[0]}}</span>
+    `,
+});
+
 Vue.component('token-table-row-one', {
     props: ['tokens'],
     // For good version: reproduce print_cmd_chr, starting section 298
-    template: '<tr><td v-for="c of tokens">{{(c[0] <= 15) ? String.fromCharCode(c[1]) : c[1]}}<sub>{{c[0]}}</sub></td></tr>',
+    template: '<tr><td v-for="c of tokens"><single-token :token="c"/></td></tr>',
 });
 Vue.component('token-table-row-two', {
     props: ['start', 'loc', 'tokens'],
@@ -30,7 +52,7 @@ Vue.component('token-table-row-two', {
             return this.loc == 'NULL' ? this.tokens.length : this.loc - this.start;
         },
     },
-    template: '<tr><td :colspan="colspan" v-if="colspan > 0"></td><td>↑</td></tr>',
+    template: '<tr><td :colspan="colspan" v-if="colspan > 0"></td><td align="center">↑</td></tr>',
 });
 Vue.component('token-table', {
     props: ['tokens', 'start', 'loc'],
@@ -38,7 +60,10 @@ Vue.component('token-table', {
 });
 
 Vue.component('input-state-row', {
-    props: ['statefield', 'indexfield', 'startfield', 'locfield', 'limitfield', 'namefield', 'rownumber', 'text', 'tokens'],
+    props: ['statefield', 'indexfield', 'startfield', 'locfield', 'limitfield', 'namefield', 'rownumber', 'text', 'tokens', 'filename'],
+    methods: {
+        strFromArray: strFromArray,
+    },
     template: `
  <tbody>
   <tr class="meanings" v-if="statefield == 0">
@@ -56,7 +81,7 @@ Vue.component('input-state-row', {
     <td class="limitfield2" v-else>(ignore, not a macro)</td>
 
     <td class= "namefield2" v-if="indexfield == 5">macro, eqtb address is {{namefield}}</td>
-    <td class= "namefield2">(ignore, not a macro)</td>
+    <td class= "namefield2" v-else>(ignore, not a macro)</td>
   </tr>
   <tr class="meanings" v-else>
     <td rowspan=2>{{rownumber}}</td>
@@ -74,7 +99,7 @@ Vue.component('input-state-row', {
     <td class= "namefield1" v-if="namefield == 0">filename: (reading from terminal)</td>
     <td class= "namefield1" v-else-if="namefield <= 16">filename: (reading from input stream {{namefield - 1}})</td>
     <td class= "namefield1" v-else-if="namefield == 17">filename: (reading from terminal with read_toks)</td>
-    <td class= "namefield1" v-else>filename: (string {{namefield}} {{typeof namefield}} {{typeof 42}} {{typeof "42"}} {{typeof {} }})</td>
+    <td class= "namefield1" v-else>filename: {{namefield}} (= <tt>{{strFromArray(filename)}}</tt>)</td>
   </tr>
   <tr class="values">
     <td class="statefield1">{{statefield}}</td>
@@ -114,7 +139,7 @@ Vue.component('input-state-record', {
     `,
 });
 
-Vue.component('input-state', {
+let inputStateComponent = Vue.component('input-state', {
     props: ['instaterecords'],
     template: `
 <table border=1 id="full-table">
@@ -123,11 +148,26 @@ Vue.component('input-state', {
     `,
 });
 
-var app = new Vue({
-  el: '#body',
-  data: {
-  }
+var vm = new inputStateComponent({
+    el: '#input-state-table',
+    data: {
+        'gdbDumpIndex': 0,
+        'instaterecords': dumped_from_gdb[0],
+    },
+    methods: {
+        setGdbDumpIndex: function(n) {
+            this.gdbDumpIndex = n;
+            this.instaterecords = dumped_from_gdb[n];
+        },
+    },
 });
 
 // Vue.config.productionTip = false;
 Vue.config.debug = true;
+
+document.getElementById('timeSlider').max = dumped_from_gdb.length;
+document.getElementById('totalTime').textContent = dumped_from_gdb.length;
+document.getElementById('timeSlider').onchange = event => {
+    vm.setGdbDumpIndex(event.target.value);
+    document.getElementById('currentTime').textContent = event.target.value;
+}
