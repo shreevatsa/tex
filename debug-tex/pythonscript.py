@@ -130,7 +130,10 @@ def showTokenList(start, loc):
     p = start
     tokens = []
     while p != NULL:
-        tokens.append(showToken(p))
+        tokens.append({
+            'location': int(p),
+            'token': showToken(p)
+            })
         p = link(p)
     return tokens
 

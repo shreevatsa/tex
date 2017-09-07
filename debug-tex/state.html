@@ -3,13 +3,22 @@
   <meta charset="utf-8"/>
   <script src="vue.js"></script>
   <script src="py-gdb-output.txt"></script>
+  <!-- <script src="py-gdb-output-xii.txt"></script> -->
+  <style>
+#showRawValues ~ * .values {
+    visibility: visible;
+}
+
+#showRawValues:not(:checked) ~ * .values {
+    display: none;
+}
+  </style>
 </head>
 <body>
 
-<div>
   <input type="range" id="timeSlider" value=0>
   Step <span id="currentTime">0</span> of <span id="totalTime"></span>
-</div>
+  Show raw values: <input id="showRawValues" type="checkbox">
 
 <div id="body">
 <!--
