@@ -23,6 +23,21 @@ function strFromArray(arr) {
     return s;
 }
 
+function reverseLines(text) {
+    const lines = text.split('\n');
+    lines.reverse();
+    return lines.join('\n');
+}
+
+function reversedJoin(arr) {
+    let s = '';
+    for (let i = arr.length - 1; i >= 0; --i) {
+        s += arr[i];
+        if (i > 0) s += '\n';
+    }
+    return s;
+}
+
 const NULL = -268435455;
 
 // Make sure to get https://vuejs.org/js/vue.js and load it first
@@ -38,7 +53,7 @@ Vue.component('buffer-table', {
  <tt>
   <table border=1>
     <tr><td v-for="c of text"><span :title="c">{{charPrintable(c)}}</span></td></tr>
-    <tr><td :colspan="colspant" v-if="colspant > 0"></td><td align="center">↑</td></tr>
+    <tr><td :colspan="colspant" v-if="colspant > 0" align="right">↑</td><td align="center">↑</td></tr>
   </table>
  </tt>
     `,
@@ -101,7 +116,6 @@ Vue.component('input-state-row-token-list', {
  <table border=1>
   <tr class="meanings">
     <!--<td rowspan=2>{{rownumber}}</td>-->
-    <td rowspan=2></td>
 
     <td class="startfield2" colspan=2><token-table :tokens=tokens :start=startfield :loc="locfield"/></td>
 
@@ -154,7 +168,6 @@ Vue.component('input-state-row-non-token-list', {
  <table border=1>
   <tr class="meanings">
     <!--<td rowspan=2>{{rownumber}}</td>-->
-    <td rowspan=2></td>
 
     <td class="startfield1" colspan=3><buffer-table :text=text :start=startfield :loc=locfield :limit="limitfield"/></td>
 
@@ -211,10 +224,15 @@ Vue.component('input-state-record', {
 });
 
 let inputStateComponent = Vue.component('input-state', {
-    props: ['instaterecords'],
+    props: ['instaterecords', 'stacktrace'],
     template: `
-<div>
- <input-state-record v-for="(instaterecord, index) in instaterecords" :rownumber="index" :instaterecord="instaterecord"/>
+<div style="display: flex; flex-direction: row;">
+ <div style="flex: 1; overflow: scroll;">
+  <pre>{{stacktrace}}</pre>
+ </div>
+ <div style="flex: 15; overflow: scroll;">
+  <input-state-record v-for="(instaterecord, index) in instaterecords" :rownumber="index" :instaterecord="instaterecord"/>
+ </div>
 </div>
     `,
 });
@@ -223,12 +241,14 @@ var vm = new inputStateComponent({
     el: '#input-state-table',
     data: {
         'gdbDumpIndex': 0,
-        'instaterecords': dumped_from_gdb[0],
+        'instaterecords': dumped_from_gdb[0]['context'],
+        'stacktrace': 'whatever',
     },
     methods: {
         setGdbDumpIndex: function(n) {
             this.gdbDumpIndex = n;
-            this.instaterecords = dumped_from_gdb[n];
+            this.instaterecords = dumped_from_gdb[n]['context'];
+            this.stacktrace = reversedJoin(dumped_from_gdb[n]['bt']);
         },
     },
 });
@@ -236,9 +256,15 @@ var vm = new inputStateComponent({
 // Vue.config.productionTip = false;
 Vue.config.debug = true;
 
+function setTime(n) {
+    document.getElementById('currentTime').textContent = n;
+    // Note these are 0-indexed, so we need the -1
+    vm.setGdbDumpIndex(n - 1);
+}
+
 document.getElementById('timeSlider').max = dumped_from_gdb.length;
 document.getElementById('totalTime').textContent = dumped_from_gdb.length;
 document.getElementById('timeSlider').oninput = event => {
-    vm.setGdbDumpIndex(event.target.value);
-    document.getElementById('currentTime').textContent = event.target.value;
+    setTime(event.target.value);
 }
+setTime(1);

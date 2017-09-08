@@ -37,6 +37,13 @@ CS_TOKEN_FLAG = 4095 # 07777 = 0xfff = 2^12-1, defined in §289
 # Some state for tracking how many times the `expand` procedure has been (recursively) called -- don't know if there's an easier way in gdb
 expand_call_stack = []
 
+def is_json_serializable(x):
+    try:
+        return x == json.loads(json.dumps(x))
+    except:
+        print('Could not serialize ', x)
+        return False
+
 def ret_json(func):
     def real(*args, **kwargs):
         ret = func(*args, **kwargs)
@@ -193,12 +200,21 @@ def dump_context():
         context.append(printInStateRecord(gdb.parse_and_eval('inputstack[%d]' % i)))
     context.append(printInStateRecord(gdb.parse_and_eval('curinput')))
     try:
-        assert json.loads(json.dumps(context)) == context
-        to_be_written_out.append(context)
-    except:
-        print('Could not serialize context: ')
+        assert is_json_serializable(context)
+        return context
+    except Exception as e:
+        print('Could not serialize context, got exception: ', e)
         for c in context:
             print(c)
+
+def frames():
+    ret = []
+    frame = gdb.selected_frame()
+    while frame is not None and frame.is_valid():
+        name = frame.name()
+        ret.append(name)
+        frame = frame.older()
+    return ret
 
 class BpExpand(gdb.Breakpoint):
     """A Breakpoint to be set on the expand function."""
@@ -219,7 +235,12 @@ class BpExpandStartOrEnd(gdb.Breakpoint):
             assert expand_call_stack[-1] == '('
             expand_call_stack.pop()
             # gdb.write('\n expand function exiting\n')
-        dump_context()
+        context = dump_context()
+        bt = frames()
+        to_be_written_out.append({
+            'context': context,
+            'bt': bt,
+        })
         return False
 
 BpExpand('tex0.c:expand')
