@@ -309,6 +309,7 @@ Vue.config.debug = true;
 
 function setTime(n) {
     document.getElementById('currentTime').textContent = n;
+    document.getElementById('timeSlider').value = n;
     // Note these are 0-indexed, so we need the -1
     vm.setGdbDumpIndex(n - 1);
 }
