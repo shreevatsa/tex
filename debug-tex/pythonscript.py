@@ -116,6 +116,15 @@ def printCs(p):
         return {'control_sequence': gettexstring(text(p))}
 
 @ret_json
+def showTokenActual(t):
+    assert t >= 0
+    if t >= CS_TOKEN_FLAG:  # CS_TOKEN_FLAG is defined in §289
+        return printCs(t - CS_TOKEN_FLAG)
+    (m, c) = (t // 256, t % 256)
+    return {'noncsToken': [m, c]}
+
+
+@ret_json
 def showToken(p):
     """Module §293 ⟨Display token p⟩
 
@@ -123,11 +132,7 @@ def showToken(p):
     if p < gdb.parse_and_eval('himemmin') or p > gdb.parse_and_eval('memend'):
         assert False, 'CLOBBERED: %s' % p
     t = int(info(p))
-    assert t >= 0
-    if t >= CS_TOKEN_FLAG:  # CS_TOKEN_FLAG is defined in §289
-        return printCs(t - CS_TOKEN_FLAG)
-    (m, c) = (t // 256, t % 256)
-    return {'noncsToken': [m, c]}
+    return showTokenActual(t)
 
 @ret_json
 def showTokenList(start, loc):
@@ -207,12 +212,57 @@ def dump_context():
         for c in context:
             print(c)
 
+'''
+What does a frame contain?
+
+Frame
+- architecture(): (gdb.Architecture)
+  - name(): 'i386:x86-64'
+  - disassemble(start_pc [, end_pc [, count]]) -> Return a list of at most COUNT disassembled instructions from START_PC to END_PC.
+- name(): 'expand'
+- function():
+  - name: 'expand'
+- block() [iterable: gdb.Symbol]
+  - sym.value(frame): (gdb.Value)
+
+- find_sal()
+  - symtab: (gdb.Symtab)
+    - static_block()
+- is_valid
+- newer()
+- older()
+- pc
+- read_register
+- read_var
+- select
+- type(): 0
+- unwind_stop_reason(): 0 (Return the reason why it is not possible to find frames older than this.)
+'''
+
 def frames():
     ret = []
     frame = gdb.selected_frame()
     while frame is not None and frame.is_valid():
         name = frame.name()
-        ret.append(name)
+        local_vars = []
+        # This is basically equivalent to `gdb.execute('info locals')`, but later we can probably be smarter using the types
+        for sym in frame.block():
+            if sym.type.name == '__CORE_ADDR':   # Bug in gdb probably worth reporting
+                """A bug in gdb, causes:
+/build/gdb-sBS5Fz/gdb-7.12.50.20170314/gdb/findvar.c:247: internal-error: store_typed_address: type is not a pointer or reference
+A problem internal to GDB has been detected,
+further debugging may prove unreliable.
+Quit this debugging session? (y or n)
+                """
+                continue
+            value = sym.value(frame)
+            # Hack!
+            if sym.name == 't' and name == 'expand':
+                local_vars.append((sym.name, sym.type.name, str(value), showTokenActual(int(value))))
+            else:
+                local_vars.append((sym.name, sym.type.name, str(value)))
+            pass
+        ret.append({'name': name, 'locals': local_vars})
         frame = frame.older()
     return ret
 
@@ -229,17 +279,20 @@ class BpExpandStartOrEnd(gdb.Breakpoint):
         if expand_call_stack[-1] == '(':
             # gdb.write('\n expand function entering\n')
             expand_call_stack.append('|')
+            enterOrExit = 'enter'
         else:
             assert expand_call_stack[-1] == '|'
             expand_call_stack.pop()
             assert expand_call_stack[-1] == '('
             expand_call_stack.pop()
             # gdb.write('\n expand function exiting\n')
+            enterOrExit = 'exit'
         context = dump_context()
         bt = frames()
         to_be_written_out.append({
             'context': context,
             'bt': bt,
+            'enterOrExit': enterOrExit,
         })
         return False
 

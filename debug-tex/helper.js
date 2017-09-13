@@ -23,19 +23,17 @@ function strFromArray(arr) {
     return s;
 }
 
-function reverseLines(text) {
-    const lines = text.split('\n');
-    lines.reverse();
-    return lines.join('\n');
-}
-
-function reversedJoin(arr) {
+function joinNames(arr) {
     let s = '';
-    for (let i = arr.length - 1; i >= 0; --i) {
-        s += arr[i];
-        if (i > 0) s += '\n';
+    for (let i = 0; i < arr.length; ++i) {
+        s += arr[i].name;
+        s += '\n';
     }
     return s;
+}
+
+function reverse(arr) {
+    return arr.map((elem, index, arr)=> arr[arr.length - 1 - index]);
 }
 
 const NULL = -268435455;
@@ -64,15 +62,9 @@ Vue.component('single-token', {
     computed: {
         token: function() { return this.tokenAndLocation.token; },
     },
-    methods: {
-        strFromArray: strFromArray,
-    },
-    // For good version: reproduce print_cmd_chr, starting section 298
+    // TODO: for good version: reproduce print_cmd_chr, starting section 298
     template: `
-      <span v-if="'noncsToken' in token" :title="token.noncsToken[0]">{{String.fromCharCode(token.noncsToken[1])}}<sub>{{token.noncsToken[0]}}</sub></span>
-      <span v-else-if="'active_character' in token" title="active character">{{strFromArray(token.active_character)}}</span>
-      <span v-else-if="'control_sequence' in token" title="control sequence">\\{{strFromArray(token.control_sequence)}}</span>
-      <span v-else :title="token">Unknown token type {{token}} with keys {{token.keys()}} like {{token.keys()[0]}}</span>
+      <token :token="token"/>
     `,
 });
 
@@ -223,15 +215,72 @@ Vue.component('input-state-record', {
     `,
 });
 
+
+
+Vue.component('token', {
+    props: ['token'],
+    methods: {
+        strFromArray: strFromArray,
+        repr: function(t) {
+            if (t < 4095 /* cs_token_flag */) {
+                const chr = t % 256;
+                const cmd = (t - chr) / 256;
+                if (cmd < 13 && 32 < chr && chr < 127) { // Regular characters... but is that right?
+                    return '<tt>' + String.fromCharCode(chr) + '<sub>' + cmd + '</sub></tt>';
+                } else {
+                    return '(cmd:' + cmd + ', chr:' + chr + ')';
+                }
+            } else {
+                return t;
+            }
+        },
+    },
+    template: `
+      <span v-if="'noncsToken' in token" :title="token.noncsToken[0]">{{String.fromCharCode(token.noncsToken[1])}}<sub>{{token.noncsToken[0]}}</sub></span>
+      <span v-else-if="'active_character' in token" title="active character">{{strFromArray(token.active_character)}}</span>
+      <span v-else-if="'control_sequence' in token" title="control sequence">\\{{strFromArray(token.control_sequence)}}</span>
+      <span v-else :title="token">Unknown token type {{token}} with keys {{token.keys()}} like {{token.keys()[0]}}</span>
+    `,
+});
+
+Vue.component('frame-local', {
+    props: ['local', 'name'],
+    // Hack: special-casing the token named 't' in 'expand'. Long-run, we want to figure out meanings for more types.
+    template: `
+     <span>
+      <span class="meaning" v-if="name == 'expand' && local[0] == 't'">
+        <tt>t</tt>: <tt><token :token="local[3]"/></tt>
+      </span>
+      <span class="values">
+        (<tt>{{local[0]}}</tt>, <tt>{{local[1]}}</tt>, <tt>{{local[2]}}</tt>)
+      </span>
+     </span>
+    `,
+});
+
+Vue.component('stack-trace-locals', {
+    props: ['frame', 'ignore'],
+    template: `
+      <p v-if="!ignore"><tt>{{frame.name}}</tt> locals:
+        <frame-local v-if="!ignore" v-for="(local, index) of frame.locals" :key="index" :local="local" :name="frame.name"/>
+      </p>
+     <p v-else><tt>{{frame.name}}</tt> locals: (not yet initialized)</p>
+    `,
+});
+
 let inputStateComponent = Vue.component('input-state', {
-    props: ['instaterecords', 'stacktrace'],
+    props: ['instaterecords', 'stacktrace', 'enterOrExit'],
+    methods: {
+        joinNames: joinNames,
+    },
     template: `
 <div style="display: flex; flex-direction: row;">
  <div style="flex: 1; overflow: scroll;">
-  <pre>{{stacktrace}}</pre>
+  <pre>{{joinNames(stacktrace)}}</pre>
  </div>
  <div style="flex: 15; overflow: scroll;">
-  <input-state-record v-for="(instaterecord, index) in instaterecords" :rownumber="index" :instaterecord="instaterecord"/>
+  <input-state-record v-for="(instaterecord, index) of instaterecords" :rownumber="index" :instaterecord="instaterecord"/>
+  <stack-trace-locals v-for="(frame, index) of stacktrace" :frame="frame" :enterOrExit="enterOrExit" :ignore="enterOrExit == 'enter' && index == (stacktrace.length - 1)"/>
  </div>
 </div>
     `,
@@ -243,12 +292,14 @@ var vm = new inputStateComponent({
         'gdbDumpIndex': 0,
         'instaterecords': dumped_from_gdb[0]['context'],
         'stacktrace': 'whatever',
+        'enterOrExit': 'whatever',
     },
     methods: {
         setGdbDumpIndex: function(n) {
             this.gdbDumpIndex = n;
             this.instaterecords = dumped_from_gdb[n]['context'];
-            this.stacktrace = reversedJoin(dumped_from_gdb[n]['bt']);
+            this.stacktrace = reverse(dumped_from_gdb[n]['bt']);
+            this.enterOrExit = dumped_from_gdb[n]['enterOrExit'];
         },
     },
 });
@@ -267,4 +318,10 @@ document.getElementById('totalTime').textContent = dumped_from_gdb.length;
 document.getElementById('timeSlider').oninput = event => {
     setTime(event.target.value);
 }
-setTime(1);
+
+n = parseInt(location.hash.slice(1));
+if (0 < n && n <= dumped_from_gdb.length) {
+    setTime(n);
+} else {
+    setTime(1);
+}
