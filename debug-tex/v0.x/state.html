@@ -1,0 +1,76 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8"/>
+  <script src="vue.js"></script>
+  <script src="py-gdb-output.txt"></script>
+  <!-- <script src="py-gdb-output-xii.txt"></script> -->
+  <style>
+#showRawValues ~ * .values {    /* A sibling of id showRawValues has a descendant of class "values" */
+    visibility: visible;
+}
+
+#showRawValues:not(:checked) ~ * .values {
+    display: none;
+}
+  </style>
+</head>
+<body>
+
+  <input type="range" id="timeSlider" min=1 value=1>
+  Step <span id="currentTime">[currentTime]</span> of <span id="totalTime">[totalTime]</span>
+  Show raw values: <input id="showRawValues" type="checkbox">
+
+<div id="body">
+<!--
+How to display something like:
+
+<ScannerState: 1, Index: 0, BufferPositions: 1 to 15, Loc: 17, => expandafter.tex |  FileName: 0="">
+<ScannerState: 1, Index: 1, BufferPositions: 17 to 58, Loc: 57, =>     \expandafter\uppercase\expandafter{a | }% FileName: 2039="expandafter.tex">
+<TokenList. TokenListType: 3, StartNode: 4995122, CurrentNodeLoc: 4995122, => [Token (11,97=a)],  ParamStart: 59, WhereInEqtb: 2039>
+<TokenList. TokenListType: 3, StartNode: 4995121, CurrentNodeLoc: 4995121, => [Token (1,123={)],  ParamStart: 59, WhereInEqtb: 2039>
+<TokenList. TokenListType: 3, StartNode: 4995120, CurrentNodeLoc: -268435455, => [ControlSequence \uppercase],  ParamStart: 59, WhereInEqtb: 2039>
+<TokenList. TokenListType: 4, StartNode: 4995119, CurrentNodeLoc: 4995119, => [Token (12,92=\), Token (12,117=u), Token (12,112=p), Token (12,112=p), Token (12,101=e), Token (12,114=r), Token (12,99=c), Token (12,97=a), Token (12,115=s), Token (12,101=e)],  ParamStart: 59, WhereInEqtb: 2039>
+
+?
+
+Sequence of time slices.
+
+On the left (narrow bar): function call stack.
+On the right (main area):
+  <buffer> (later) (relevant bits of)
+  <tokens> (later) (relevant bits of)
+  <input stack rows>
+      <each row:
+            top line: 6 cells: ['statefield', 'indexfield', 'startfield', 'locfield', 'limitfield', 'namefield'] (greyed out)
+                             = [              tokenListType                            paramStart   whereInEqtb  (last two only relevant if macro)
+            bottom line: "meanings":
+
+               Case I: Line of input
+                    statefield: one of MID_LINE = 1, SKIP_BLANKS = 17, NEW_LINE = 33.
+                    indexfield: (roughly: file-open depth. See section 304 for details)
+                    startfield: position in `buffer` where the line we're reading starts
+                      locfield: position in `buffer` that we're about to read from (or if loc > limit, then line has been fully read)
+                    limitfield: position in `buffer` of the last character of the line
+                     namefield: 0 => reading from terminal,
+                                1 to 16 => reading from input stream n-1,
+                                17 => reading from terminal (read_toks),
+                                >17 => string number of name of current file
+
+             Case II: Token list
+                    statefield: TOKEN_LIST = 0
+                    indexfield: type of token list
+                    startfield: first node of token list
+                      locfield: node in token list that we're about to read, or `null` if token list is fully read
+                    limitfield: *if* indexfield = macro = 5, then: where the parameters of the current macro start, in param_stack
+                     namefield: *if* indexfield = macro = 5, then: the eqtb address of the token being expanded
+
+      >
+-->
+
+<input-state id="input-state-table"></input-state>
+
+</div>
+
+<script type='text/javascript' src="helper.js">
+</script>
+</body>
