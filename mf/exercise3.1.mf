@@ -1,0 +1,16 @@
+beginchar("A", 10, 10, 0);
+
+a = 150;
+b = 200;
+
+z1 = (0, b); z2 = (a, b); z3 = (2a, b);
+z4 = (0, 0); z5 = (a, 0); z6 = (2a, 0);
+
+pickup pencircle;
+penlabels(1,2,3,4,5,6);
+
+draw z4 .. z2{z4-z3} .. z3;
+
+% draw z4 .. z2{z3-z4} .. z3;
+endchar;
+end

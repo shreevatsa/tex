@@ -1,0 +1,84 @@
+How TeX does hyphenation.
+
+Let's look at:
+
+- The first (design) version, from TEXDR.AFT
+- The first implemented (stable) version, from TeX77 manual (TeX & METAFONT: New Directions in Typesetting)
+- The current version, from The TeXbook Appendix H
+
+* The first version from TEXDR.AFT
+
+#+BEGIN_SRC
+There are three "discretionary" symbols used to provide or inhibit breaks:
+		\-	OK to hyphenate this word here;
+		\+	do not hyphenate here;
+		\*	OK to break here, but insert a times sign not a hyphen.
+The last of these would be used in a long product like $(n+1)\*(n+2)\*(n+3)\*(n+4)$.
+
+
+Besides using the permissible breaks, TEX will try to hyphenate words.
+It will do this only in a sequence of lower-case letters than is preceded and
+followed by anything other than a letter, digit, -, \-, or \+. Note that,
+for example, already-hyphenated compound words will not be broken. If a
+permissible hyphenation break is discovered, a penalty of say 30 units of badness
+will be paid, but this may be better than not hyphenating at all. An additional
+20 units of badness is charged for breaking a word or formula in the last
+line of a paragraph.
+
+There is no point in finding all possible places to hyphenate. For one thing,
+the problem is extremely difficult, since e.g. the word "record" is supposed to
+be broken as "rec-ord" when it is a noun but "re-cord" when it is a verb.
+Consider the word "hyphenation" itself, which is rather an exception:
+	hy-phen-a-tion	vs.  co-or-di-na-tion
+Why does the n go with the a in one case and not the other? Starting at letter
+a in the dictionary and trying to find rigorous rules for hyphenation without
+much knowledge, we come up against a-part vs. ap-er-ture, aph-o-rism vs. a-pha-sia,
+etc. It becomes clear that what we want is not an accurate but ponderously slow
+routine that consumes a lo of memory space and processing time, instead we want
+a set of hyphenation rules that are
+	a) simple;
+	b) almost always safe;
+	c) powerful enough to find say 80% of the words already hyphenated in
+		The Art of Computer Programming.
+To justify point (c), I find that there are about 2 hyphenated words per page
+in the books, and the places where the rules I shall propose do not find the
+identical hyphenation only very rarely would cause a really bad break. The
+time needed to handle the remaining exceptions is therefore insignificant by
+comparison with what I already do when proof-reading.
+
+So here are the rules I came up with.
+1. Consider only breaks in which both parts contain a vowel other than final e.
+(Vowels are a,e,i,o,u,y.)
+2. Subject to 1, break before the following "safe" suffixes:
+-cious -gion -ly -ment -mial -nary -ness -nomial -sion -tion -ture -vious
+and also -tive preceded by a vowel, -ed preceded by d or t.
+Break before -ing except in -bling -pling or when preceded by a double letter
+other than ll or ss or zz; for other double letters, break between them.
+If the word ends in s or ly, strip off this ending and apply these rules again.
+Suffixes recognized by this rule must not be further broken except vi-ous.
+3. Subject to 1 and 2, break after the following "safe" prefixes:
+algo- equi- ex- hyper- ini- intro- lex- lexi- math- mathe- max- maxi- mini- multi-
+out- over- pseudo- semi- some- sub- super- there- under-
+Also be- followed by c,h,s,w; dis- followed by anything but h,y; trans- followed
+by a,f,g,l,m; tri- followed by a,f,p,u.
+4. Subject to 1 and 2, combine an h with the previous letter if it is a consonant,
+treating the combination as a consonant; then it's OK to break between the two
+consonants in the pattern vc-cv except when the pair of consonants is
+bl ck cl cr dr ght gl gr lk ll nd ng pl rch rd rm rt sch sp ss st thr zz
+(I may have to revise this list.)
+
+There will be rare exceptions (e.g., equivocate, minister, somersault, triphammer),
+but these will be so infrequent as to be unimportant. Looking through quite a few
+pages of volume 3, I found 48 hypenations, and the above rules were satisfactory
+except in the three cases
+	de-gree  hap-hazard  re-placement.
+Of course, these rules are biased toward my vocabulary and subject matter, but a
+few extensions should make it work well enough for nearly everybody.
+#+END_SRC
+
+* The implemented version from TeX 77
+
+#+BEGIN_SRC
+
+
+#+END_SRC

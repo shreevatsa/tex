@@ -1,0 +1,326 @@
+(Reading The METAFONTbook)
+
+* What is METAFONT?
+METAFONT is a drawing program.
+
+More precisely, it is a system where you can write a program to describe a shape (such as the shape of the letter Q in a font you are designing).
+
+[TODO: qualify the paragraph below -- what happens after the program is written? How does the shape come into (visual) existence?]
+Then METAFONT generates some output from your description (program), namely a raster representation of your shape. Once upon a time such output was usable as a font. It still is, but with limitations for screen output.
+
+* Reasons to learn METAFONT
+** Explicit design
+#+BEGIN_QUOTE
+One of the advantages of
+METAFONT is that it provides a discipline according to which the principles
+of a particular alphabet design can be stated precisely. The underlying
+intelligence does not remain hidden in the mind of the designer; it is
+spelled out in the programs. Thus consistency can readily be obtained
+where consistency is desirable, and a font can readily be extended to
+new symbols that are compatible with the existing ones.
+#+END_QUOTE
+
+** Some things are easy
+#+BEGIN_QUOTE
+Although there is no royal road to type design, there are some things that
+can, in fact, be done well with METAFONT in an afternoon. Geometric designs
+are rather easy; and it doesn't take long to make modifications to letters
+or symbols that have previously been expressed in METAFONT form. Thus,
+although comparatively few users of METAFONT will have the courage to do an
+entire alphabet from scratch, there will be many who will enjoy
+customizing someone else's design.
+#+END_QUOTE
+
+** Can do optical scaling -- better than current practice
+#+BEGIN_QUOTE
+Typefaces intended for text are normally seen small, and our eyes can read
+them best when the letters have been designed specifically for the size at
+which they are actually used. Although it is tempting to get 7-point fonts
+by simply making a 70% reduction from the 10-point size, this shortcut
+leads to a serious degradation of quality. Much better results can be
+obtained by incorporating parametric variations into a meta-design.
+#+END_QUOTE
+
+** Can do "late-binding" of design decisions
+#+BEGIN_QUOTE
+it allows you to
+postpone making decisions about many aspects of your design. If you leave
+certain things undefined, treating them as parameters instead of
+“freezing” the specifications at an early stage, the computer will be
+able to draw lots of examples with different settings of the parameters,
+and you will be able to see the results of all those experiments at the final
+size. This will greatly increase your ability to edit and fine-tune the font.
+#+END_QUOTE
+
+** Can specify the design of serifs bowls etc. -- see illustrated example
+#+BEGIN_SRC p.2
+A METAFONT definition of a complete typeface generally consists of three
+main parts. First there is a rather mundane set of subroutines that take care
+of necessary administrative details, such as assigning code numbers
+to individual characters; each character must also
+be positioned properly inside an invisible “box,” so that typesetting
+systems will produce the correct spacing. Next comes a more interesting
+collection of subroutines, designed to draw the basic strokes characteristic
+of the typeface (e.g., the serifs, bowls, arms, arches, and so on).
+These subroutines will typically be described in terms of their own special
+parameters, so that they can produce a variety of related strokes;
+a serif subroutine will, for example, be able to draw serifs of
+different lengths, although all of the serifs it draws should have the
+same “feeling.” Finally, there are routines for each of the characters.
+If the subroutines in the first and second parts have been chosen well,
+the routines of the third part will be fairly high-level descriptions
+that don't concern themselves unnecessarily with details; for example, it
+may be possible to substitute a different serif-drawing subroutine without
+changing any of the programs that use that subroutine, thereby obtaining
+a typeface of quite a different flavor. [A particularly striking example
+of this approach has been worked out by John D. Hobby and Gu Guoan
+in “A Chinese Meta-Font,” /TUGboat (*5*)/ (1984), 119--136. By
+changing a set of 13 basic stroke subroutines, they were able to draw 128
+sample Chinese characters in three different styles (Song, Long Song,
+and Bold), using the same programs for the characters.]
+#+END_SRC
+https://www.tug.org/TUGboat/tb05-2/tb10hobby.pdf See figures 9 and 11.
+
+** Intellectual curiosity
+You get to explore the mind of DEK
+
+** Learn something obscure
+Very few people know it. That's a thrill in itself, learning a black art.
+
+** Can use it for design, even if not final font
+Even if you can't get a usable font directly out of it, you may be able to experiment with parameters etc.
+
+* Reasons not to learn METAFONT
+** It produces raster output
+#+BEGIN_QUOTE
+METAFONT is a system for the design of alphabets suitable to raster-based devices that print or display text.
+#+END_QUOTE
+This makes it better suited for print (at a fixed/known resolution), than for screen (unknown resolution).
+
+** It needs disparate skills, or collaboration
+#+BEGIN_QUOTE
+A top-notch designer of typefaces needs to have an unusually good eye and a highly developed sensitivity to the nuances of shapes. A top-notch user of computer languages needs to have an unusual talent for abstract reasoning and a highly developed ability to express intuitive ideas in formal terms. Very few people have both of these unusual combinations of skills; hence the best products of METAFONT will probably be collaborative efforts between two people who complement each other's abilities. Indeed, this situation isn't very different from the way types have been created for many generations, except that the rôle of “punch-cutter” is now being played by skilled computer specialists instead of by skilled metalworkers.
+#+END_QUOTE
+
+** It is difficult: you explain how to draw, rather than just draw
+#+BEGIN_QUOTE
+Meta-design is much more difficult than design; it's easier to draw something
+than to explain how to draw it. One of the problems is that different sets
+of potential specifications can't easily be envisioned all at once.
+Another is that a computer has to be told absolutely everything.
+However, once we have successfully explained how to draw something
+in a sufficiently general manner, the same explanation will work for
+related shapes, in different circumstances; so the time spent in formulating
+a precise explanation turns out to be worth it.
+#+END_QUOTE
+
+** Easy to make bad fonts
+#+BEGIN_QUOTE
+One of the disadvantages of METAFONT
+is that a person can easily use it to produce poor alphabets, cheaply and
+in great quantity. Let us hope that such experiments will have educational
+value as they reveal why the subtle tricks of the trade are important, but
+let us also hope that they will not cause bad workmanship to proliferate.
+Anybody can now produce a book in which all of the type is home-made, but
+a person or team of persons should expect to spend a year or more on the
+project if the type is actually supposed to look right. METAFONT won't put
+today's type designers out of work; on the contrary, it will tend to make
+them heroes and heroines, as more and more people come to appreciate their
+skills.
+#+END_QUOTE
+
+** It's like describing shapes over the telephone
+#+BEGIN_QUOTE p.2
+How can we actually
+specify shapes that depend on unspecified parameters?
+
+[...]
+
+We must go to a verbal approach, using some sort
+of language to describe the desired drawings. Let's imagine, for example,
+that we want to explain the shape of a certain letter ‘a’ to a friend in
+a distant country, using only a telephone for communication; our friend
+is supposed to be able to reconstruct exactly the shape we have in mind.
+Once we figure out a sufficiently natural way to do that, for a particular
+fixed shape, it isn't much of a trick to go further and make our verbal
+description more general, by including variable parameters instead of
+restricting ourselves to constants.
+#+END_QUOTE
+
+** You need to be comfortable at least with algebra
+Would you be comfortable reading and writing recipes like this? --
+
+#+BEGIN_QUOTE p.2
+An analogy to cooking might make this point clearer. Suppose you have just
+baked a delicious berry pie, and your friends ask you to tell them the
+recipe so that they can bake one too. If you have developed your cooking
+skills entirely by intuition, you might find it difficult to record exactly
+what you did. But there is a traditional language of recipes in which you
+could communicate the steps you followed; and if you take careful measurements,
+you might find that you used, say, 1$1\over4$ cups of sugar. The next step,
+if you were instructing a computer-controlled cooking machine, would be to
+go to a meta-recipe in which you use, say, $.25x$ cups of sugar for $x$
+cups of berries; or $.3x+.2y$ cups for $x$~cups of boysenberries and
+$y$~cups of blackberries.
+
+In other words, going from design to meta-design is essentially like
+going from arithmetic to elementary algebra. Numbers are replaced
+by simple formulas that involve unknown quantities.
+#+END_QUOTE
+
+If you are, then it's great.
+
+** You may not need the meta-ness
+#+BEGIN_QUOTE
+The idea of a meta-font should now be clear. But what good is it?
+The ability to manipulate lots of parameters may be interesting and fun,
+but does anybody really need a 6 1/7-point font
+that is one fourth of the way between Baskerville and Helvetica?
+-- DONALD E. KNUTH, /The Concept of a Meta-Font/ (1982) (Visible Language 16, p19)
+#+END_QUOTE
+
+** You will not get the meta-ness automatically
+Just because Computer Modern is very parametrized doesn't mean that using METAFONT will automatically make your font parametrized. METAFONT is just a tool for enabling this; you need to work hard to achieve it. (See comment in Han The Thahn's thesis.)
+
+** Possibly not even the best "write a program to draw" software
+Even within its category of declarative drawing programs, other programs like Metapost and TikZ exist
+See a bunch of such languages at https://tex.stackexchange.com/questions/394616/soviet-union-postal-code-style-digits-in-latex (for geometrical shapes)
+
+** Very few people use it
+Probably 2 digits in the world?
+
+** No anti-aliasing (aka grayscaling) or subpixel rendering
+Everything is bi-level (every pixel either completely black or completely white). There is no grayscaling, subpixel rendering, etc. This is fine for high-resolution devices (lots of pixels per inch), such as print. For computer screens, this is still (in 2017), not fine (e.g. those techniques are still needed even on MacBook with "Retina display").
+
+* How to draw
+Decide points, decide curves:
+#+BEGIN_QUOTE
+In a typical application of METAFONT, you prepare a rough sketch of the shape
+you plan to define, on a piece of graph paper, and you label important
+points on that sketch with any convenient numbers. Then you write a METAFONT
+program that explains
+(i) the coordinates of those key points, and
+(ii) the lines or curves that are supposed to go between them.
+#+END_QUOTE
+(For example, for an uppercase A, there may be five interesting points.)
+
+For this approach -- explain the points, and the explain the things drawn -- to work, we need to understand coordinates, and curves.
+
+Coordinates:
+
+- METAFONT internally has a grid with unit u = 1/K pixel (K = 65536),
+  and each "pixel" correponds to the square region from (Kx, Ky) to (K(x+1), K(y+1)).
+  METAFONT will decide whether this entire pixel should be made black or white.
+
+Curves:
+
+- There are two ways of making pixels black:
+  - "draw", which means move a pen of a certain thickness along a certain curve
+  - "fill", which means define a region in the plane and blacken all pixels inside
+
+* Chapter 2: Coordinates
+** How it works -- the syntax, MF program behaviour etc.
+- METAFONT uses 2D coordinates with (0,0) at the bottom-left. (This is unlike many other computer systems (like SVG) that have (0,0) at top left...)
+
+- The units are pixels. (We usually want to produce shapes at multiple resolutions, so this is why it's usually better *not* to use absolute coordinates like (100, 200), but instead to use coordinates like (a, 2b) where a and b are defined from the resolution.)
+
+- You can refer to locations inside a pixel:
+#+BEGIN_QUOTE
+point (31.5,42.5), which lies smack in the middle of the pixel
+whose corners are at (31,42), (31,43), (32,42), and (32,43).
+The computer works internally with coordinates that are integer multiples
+of 1/65536 ≈ 0.00002 of the width of a pixel
+#+END_QUOTE
+
+** Further ways of specifying coordinates: magic (convention) / syntax
+- As mentioned above, you can write (10, 20) for instance, but it's better to write things like (a, 2b). Note you can write "2b" -- you don't have to write "2 * b".
+
+- You can write "z5" and it means "(x5, y5)".
+  (This works for numbers in place of "5", but I don't know the full extent.)
+  (I think you can also write "z[5]".)
+
+- Instead of "z1 = (0, b)" you can also say "top z1 = (0, b)", similarly with "top" replaced with "bot", "lft" and "rt". Can combine them: "top lft z1 = (0, b)". These constitute an implicit definition for the point z1: "top z1 = (0, b)" means that the top of the pen is at (0, b), when the centre of the pen is at z1.
+
+- Interpolation (*mediation*): can write "t[z1, z2]", where t is a number (e.g. 0.5) to mean "z1 + t(z2 - z1)" or in other words "(1-t)z1 + t z2".
+  (Exercise: 0.5[z1, z2] = (z1 + z2)/2, and t[z1, z2] = (1-t)[z2, z1].)
+
+** Advice
+- Avoid doing *any* algebra by hand (e.g. computing coordinates), leave as much algebra as possible to the computer. This is clearer, less error-prone, and easier to modify later. (See Exercise 2.10 and its answer.)
+
+** Example
+#+BEGIN_SRC metafont
+  beginchar("A", 10, 10, 0);
+    % These should ideally be resolution-dependent parameters
+    b = 0.25 * 1000;
+    a = 0.25 * 900;
+    s = 0.25 * 200;
+    % The left bottom of the A
+    bot z1 = (s, 0);
+    % The right bottom of the A
+    bot z2 = z1 + (a, 0);
+    % The top point
+    z3 = (0.5[x1, x2], b);
+    % The two points on the left and right lines
+    z4 = 0.4[z1, z3];
+    z5 = 0.4[z2, z3];
+    % Now draw the letter
+    pickup pencircle;
+    draw z1 .. z3;
+    draw z3 .. z2;
+    draw z4 .. z5;
+    penlabels(1,2,3,4,5,6);
+  endchar;
+  end
+#+END_SRC
+
+* Chapter 3: Curves
+
+With ruler-and-compass constructions, one could only draw straight lines and arcs of circles. METAFONT extends it by adding (cubic) Bezier curves (aka Bernshtein polynomials).
+
+This is the syntax:
+
+- ~draw z4 .. controls z1 and z2 .. z6~
+
+Even more, it adds a dizzying bunch of features that let you specify the Bezier curve without specifying the control points explicitly -- the control points will be computed by METAFONT. (And DEK wants you to use these shortcuts, rather than specify the control points explicitly.)
+
+- You can specify just the points on the curve: ~draw z1..z2..z3..z4..z5~
+- You can add some "tension" (default is 1): replace ~z2..z3~ with ~z2..tension 1.2..z3~ or ~z2..tension 1.1 and 1.2..z3~
+- You can specify directions: replace ~z2..z3~ with ~z2{z4-z1}..z3~ to say that when the pen leaves z2 to move towards z3, it must be travelling in the direction of z4-z1. As shortcults, you can specify directions as ~{(1, 0)}~ or as ~{right}~ or as ~{dir 20}~.
+- You can specify curl at the endpoints: ~draw z4{curl 2} .. z2 .. {curl 0} z3~ (default is ~curl 1~)
+- You can specify boundedness-if-possible, with three dots ~...~ instead of two ~..~
+
+[I think this is basically it. METAFONT adds a lot more features that you will appreciate as you design programs, but basically with what you know so far (specify coordinates with ~(x, y)~, and specify curves with ~draw z1 .. controls z2 and z3 .. z4~) you can produce every shape that can be produced with METAFONT. Am I right? Oh sure there's some stuff about pens etc...]
+
+* Other book notes
+
+** Dedication
+
+The book is dedicated:
+#+BEGIN_QUOTE
+To Hermann Zapf:
+Whose strokes are the best
+#+END_QUOTE
+-- DEK has said that “strokes” here stands for both literal font strokes, and some sort of slang expression meaning inspiration, encouragement, etc.
+
+** Could we interpolate from drawings?
+
+METAFONT doesn't support it, but Page 2 suggests this possibility:
+#+BEGIN_QUOTE
+How can we actually
+specify shapes that depend on unspecified parameters?
+
+If only one parameter is varying, it's fairly easy to solve the problem in
+a visual way, by overlaying a series of drawings that show graphically how
+the shape changes. [...]
+
+But if there are two or more independent parameters, a purely visual solution
+becomes too cumbersome. We must go to a verbal approach
+#+END_QUOTE
+
+* See later
+
+Richard Rubinstein, "Digital typography : an introduction to type and composition for computer system design"
+In Han The Thahn's thesis, this book is used as reference 32 in:
+#+BEGIN_QUOTE
+In practice, both traditional artists and computer scientists have had great difficulty in creating high-quality typefaces with METAFONT [32]. METAFONT requires the user to have the typographic skill to draw letterform as well as the skill to express the drawing by algebraical expressions. For this reason, there are not many good original typefaces available in METAFONT.
+#+END_QUOTE

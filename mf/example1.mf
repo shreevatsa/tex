@@ -1,0 +1,22 @@
+beginchar("A", 10, 10, 0);
+  % These should ideally be resolution-dependent parameters
+  b = 0.25 * 1000;
+  a = 0.25 * 900;
+  s = 0.25 * 200;
+  % The left bottom of the A
+  bot z1 = (s, 0);
+  % The right bottom of the A
+  bot z2 = z1 + (a, 0);
+  % The top point
+  z3 = (0.5[x1, x2], b);
+  % The two points on the left and right lines
+  z4 = 0.4[z1, z3];
+  z5 = 0.4[z2, z3];
+  % Now draw the letter
+  pickup pencircle;
+  draw z1 .. z3;
+  draw z3 .. z2;
+  draw z4 .. z5;
+  penlabels(1,2,3,4,5,6);
+endchar;
+end
