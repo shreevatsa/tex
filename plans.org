@@ -1,0 +1,41 @@
+(See also `what.md` in `../web2any`.)
+
+“TeX and me”
+
+These are some things I'd like to do (in no particular order):
+
+- Present a good history of the TeX program
+  - Format TEXDR.AFT and TEX.ONE and put an annotated version on the web
+  - Show all archived versions of the original (TeX78) SAIL program
+    - Cross-reference with ~errorlog~
+    - Hand-translate them to Python OR write a SAIL interpreter/compiler to run those in
+
+- Explain TeX's algorithm for layout (the box-glue-penalty model)
+  - Reread Seroul & Levy book, it explains it very well
+  - Incorporate advanced examples from the paper /Breaking Paragraphs into Lines/ (many are also in /The TeXBook/ exercises or appendices, and in the “Advanced TeXarcana” video lectures)
+  - Reimplement in Python/JavaScript (I know bramstein already did it, but do it in a more debuggable/visual way)
+  - Implement LuaTeX hooks to visually show this process in action, for typical TeX documents.
+
+- Explain the TeX program itself
+  - Re-implement TANGLE and WEAVE
+  - Typeset the TeX program for HTML
+    - With annotations
+    - Modules can be clicked to expand/collapse, etc.
+  - Refine this TANGLE/WEAVE, to provide indexing, cross-references, symbol information (“this variable is only used in…”) etc.
+
+- Make the TeX program run in a browser
+  - Using the work from the above, a sufficiently advanced language-tool can become an interpreter
+  - OR compile to WASM?
+  - Extend to work with eTeX
+  - Extend to work with pdfTeX and/or XeTeX
+
+- Make the TeX program run in a browser, in a debuggable way
+  - Visually show what's going on, what macros are being expanded, what hlists/vlists have been generated, etc.
+
+- Write a better TeX engine
+  - LuaTeX hooks are great, but they are still “inversion of control” — write one that's extensible completely (like Emacs): *any* working can be ripped out and replaced.
+  - Address the problems discussed in Mittelbach's two “Guidelines for future TeX extensions” papers.
+
+
+
+
