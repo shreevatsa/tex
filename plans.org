@@ -1,6 +1,6 @@
 (See also `what.md` in `../web2any`.)
 
-“TeX and me”
+* “TeX and me”
 
 These are some things I'd like to do (in no particular order):
 
@@ -16,12 +16,18 @@ These are some things I'd like to do (in no particular order):
   - Reimplement in Python/JavaScript (I know bramstein already did it, but do it in a more debuggable/visual way)
   - Implement LuaTeX hooks to visually show this process in action, for typical TeX documents.
 
+- Explain other “algorithms” of TeX.
+  - The TeX program represents Knuth's solutions to various typesetting (and programming) problems: how to break paragraphs into lines, how to set mathematics, etc. We need those factored out, so others can learn (people *don't* learn by reading the entire TeX program anymore).
+
 - Explain the TeX program itself
   - Re-implement TANGLE and WEAVE
   - Typeset the TeX program for HTML
     - With annotations
     - Modules can be clicked to expand/collapse, etc.
   - Refine this TANGLE/WEAVE, to provide indexing, cross-references, symbol information (“this variable is only used in…”) etc.
+  - Call attention to other TeX programs, e.g. see Martin Ruckert's web2w which is kind of similar
+  - “Refactor” the TeX program: tangles to the same file, but ordered and explained differently (e.g. top-down instead of bottom-up)
+  - Write a visualizer/explainer for the DVI file format. (I have a bit already, also use dvisvgm and kaitai.io)
 
 - Make the TeX program run in a browser
   - Using the work from the above, a sufficiently advanced language-tool can become an interpreter
@@ -29,13 +35,36 @@ These are some things I'd like to do (in no particular order):
   - Extend to work with eTeX
   - Extend to work with pdfTeX and/or XeTeX
 
-- Make the TeX program run in a browser, in a debuggable way
+- Make the TeX program more debuggable
+  - At the level of macro-expansion, at the level of paragraphs, everything.
   - Visually show what's going on, what macros are being expanded, what hlists/vlists have been generated, etc.
+  - Visually show the DVI file structure (see mentioned above).
+  - (The above “Make the TeX program run in a browser” will probably help)
 
 - Write a better TeX engine
   - LuaTeX hooks are great, but they are still “inversion of control” — write one that's extensible completely (like Emacs): *any* working can be ripped out and replaced.
   - Address the problems discussed in Mittelbach's two “Guidelines for future TeX extensions” papers.
+  - Use multiple cores to run (even) faster. Needs some sort of speculative computation.
+  - Also place-holders maybe (e.g. leave some space for references and populate them later).
 
+* More on individual items
 
+** TANGLE and WEAVE
 
+*** What is TANGLE?
+The TeX program is written in literate-programming system called WEB. The source code is written in a ~tex.web~ file, which TANGLE converts into Pascal source code (~tex.pas~ or ~tex.p~).
+So TANGLE is the first step of working with the TeX source code. In some sense it's the most boring program of Knuth, because no one uses it these days (they use ~[[https://tug.org/web2c/][web2c]]~ or [[https://www.tug.org/interviews/schenk.html][MiKTeX's C4P]], to convert ~tex.web~ directly to C source code). But that's where I will start, as my goal is just to understand first.
+
+*** What does TANGLE do?
+I looked at Appendix A and C of ~cwebman~ (the examples of ~.web~ to ~.pas~), and figured out a few things that ~tangle~ needs to do:
+  - Understand (process or ignore) control codes (@!, @*, @<, @>, etc.)
+  - Deal with abbreviated module names, like ~@<Types in the glob...@>~
+  - Put the code for every module in the correct place
+  - Add comments like ~{53:}~ and ~{:53}~
+  - Rename variables (e.g. ~id_ptr~ to ~IDPTR~)
+  - Expand macros (defines), both parametric and “constants”
+  - Labels to numeric (e.g. “found” to “31”
+  - Line breaks in output (fit within 72 characters or whatever)
+  - Octal constants
+  - String pool
 
