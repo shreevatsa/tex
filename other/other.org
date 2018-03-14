@@ -1,0 +1,11 @@
+* Further reading
+
+** Line breaking
+
+Good:
+- http://xxyxyz.org/line-breaking/
+
+Lots of misinformed comments:
+- https://news.ycombinator.com/item?id=16507944
+- https://github.com/jaroslov/knuth-plass-thoughts
+- https://bugzilla.mozilla.org/show_bug.cgi?id=630181#c8
