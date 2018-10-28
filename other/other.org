@@ -9,3 +9,12 @@ Lots of misinformed comments:
 - https://news.ycombinator.com/item?id=16507944
 - https://github.com/jaroslov/knuth-plass-thoughts
 - https://bugzilla.mozilla.org/show_bug.cgi?id=630181#c8
+
+** Problems with TeX
+
+(I have a list elsewhere, just collecting links here for now)
+
+- https://tex.stackexchange.com/questions/222500/why-is-latex-so-complicated
+- https://tex.stackexchange.com/questions/41924/as-an-expert-can-you-always-use-tex-for-nearly-any-kind-of-document
+- https://tex.stackexchange.com/questions/1756/why-should-i-use-latex
+- https://tex.stackexchange.com/questions/151404/can-you-do-all-what-you-want-with-tex
