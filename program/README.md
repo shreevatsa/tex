@@ -5,4 +5,7 @@ too sluggish. So I may need to do something else: parse the "parts"
 and maybe put each part in a separate page. (Note that CONTENTS.tex
 will contain the page/section numbers of each part.)
 
+Also, the font can obviously be shared across the different SVGs.
 
+And every letter is in its own tspan, maybe ask the dvisvgm author
+about it?
