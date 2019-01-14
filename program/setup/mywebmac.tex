@@ -1,0 +1,24 @@
+% Compile with either "luatex --output-format=dvi" or "pdftex --output-format=dvi"
+% \let\pdfpageheight=\pageheight % uncomment to use luatex
+\input webmac
+\def\rheader{\eightrm\title\hfill\rhead} % top line on right-hand pages
+\let\lheader=\rheader
+
+% Copied from webmac, with "\par\vfil\eject" prepended.
+\outer\def\M#1.{\par\vfil\eject\MN#1.\ifon\vfil\penalty-100\vfilneg % beginning of section
+  \vskip12ptminus3pt\startsection\ignorespaces}
+% Alternative possible with luatex:
+% \suppressoutererror=1
+% \let\oldM=\M
+% \outer\def\M#1.{\par\vfil\eject\oldM#1.}
+
+\newdimen\tmpdimen
+\tmpdimen = \maxdimen
+\advance\tmpdimen by -10 in
+\advance\vsize by \tmpdimen
+\advance\pageheight by \tmpdimen
+\advance\fullpageheight by \tmpdimen
+\advance\pdfpageheight by \tmpdimen
+% Avoid overfull lines at all costs
+\tolerance=9999
+\emergencystretch=\maxdimen
