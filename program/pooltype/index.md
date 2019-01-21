@@ -12,6 +12,10 @@ We begin our study of DEK's programs (leading up to TeX) with `POOLtype`.
 
 It is a very simple (almost trivial) program, but reading it is useful to get a glimpse of WEB, of the programming style, etc.
 
+**Table of contents**
+* TOC
+{:toc}
+
 ## Background: string pools
 
 The year is 1980 or so. You're having to write programs in PASCAL, trying to stick to the standard version, but coming up against its limitations. What do you do?
