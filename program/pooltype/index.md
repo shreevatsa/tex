@@ -1,18 +1,10 @@
-----
-title: Reading the POOLtype program by Donald Knuth
-date: 2019-01-20
-----
-
 <style>
 object {
 	border: 2px solid grey;
+    width: 100%;
 }
 img {
     max-width: 100%;
-}
-body {
-	/* Trying to match the SVGs but I don't know how this number is determined */
-	max-width: 651px;
 }
 </style>
 
