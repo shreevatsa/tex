@@ -1,5 +1,8 @@
-<head>
-<title>Reading the POOLtype program by Donald Knuth</title>
+----
+title: Reading the POOLtype program by Donald Knuth
+date: 2019-01-20
+----
+
 <style>
 object {
 	border: 2px solid grey;
@@ -7,8 +10,11 @@ object {
 img {
     max-width: 100%;
 }
+body {
+	/* Trying to match the SVGs but I don't know how this number is determined */
+	max-width: 651px;
+}
 </style>
-</head>
 
 We begin our study of DEK's programs (leading up to TeX) with `POOLtype`.
 
