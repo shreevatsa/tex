@@ -1,18 +1,14 @@
----
-layout: post
-title: POOLtype
-excerpt: 
-date: 2019-01-17
-tags: [done]
-
----
-
+<head>
+<title>Reading the POOLtype program by Donald Knuth</title>
 <style>
 object {
 	border: 2px solid grey;
 }
+img {
+    max-width: 100%;
+}
 </style>
-
+</head>
 
 We begin our study of DEK's programs (leading up to TeX) with `POOLtype`.
 
@@ -22,9 +18,9 @@ It is a very simple (almost trivial) program, but reading it is useful to get a 
 
 The year is 1980 or so. You're having to write programs in PASCAL, trying to stick to the standard version, but coming up against its limitations. What do you do?
 
-If you are Brian W. Kernighan, you'll write an influential article called “Why Pascal is Not My Favorite Programming Language” ([HTML](https://www.lysator.liu.se/c/bwk-on-pascal.html), [PDF](http://doc.cat-v.org/bell_labs/why_pascal/why_pascal_is_not_my_favorite_language.pdf)). The top reason: without using one of the various diverging and nonstandard extensions to Pascal, if you wrote a function that takes a string as input paramter, it had to be a string of a fixed length — a string was an array of characters, and arrays of different lengths were different types. (If you wanted to handle strings of different lengths, you could create a separate function for each length.)
+If you are Brian W. Kernighan, you'll write an influential article called “Why Pascal is Not My Favorite Programming Language” ([HTML](https://www.lysator.liu.se/c/bwk-on-pascal.html), [PDF](http://doc.cat-v.org/bell_labs/why_pascal/why_pascal_is_not_my_favorite_language.pdf)). The top reason: without using one of the various diverging and nonstandard extensions to Pascal, if you wrote a function that takes a string as input parameter, it had to be a string of a fixed length — a string was an array of characters, and arrays of different lengths were different types. (If you wanted to handle strings of different lengths, you could create a separate function for each length.)
 
-If you are Donald E. Knuth, and given to things like [writing your own assembler] as a matter of course, then you deal with these problems by ignoring the language's insufficient solutions and building your own. 
+If you are Donald E. Knuth, and given to things like [writing your own assembler](http://ed-thelen.org/comp-hist/B5000-AlgolRWaychoff.html#7) as a matter of course, then you deal with these problems by ignoring the language's insufficient solutions and building your own. 
 
 String pools were his solution to the string problem: in his program he simply declared a giant array of characters, and every string that was wished to be stored in the program would have its characters stored sequentially in that array, with a separate array for keeping track of where each string starts.
 
@@ -69,7 +65,7 @@ If you skipped the previous section, some background: WEB programs are processed
     16output file name
     *117275187
 
-So as you can see, it consists of a bunch of lines, on each of which the first two characters are ASCII digits '0' to '9' representing the length of the string, and the rest of the characters are the actual string. (Lines 7 and 9 are “02! ” and “02? ” – they end with a space.) The last line contains a kind of hash (not a cryptographic one, just a simple check).
+So as you can see, it consists of a bunch of lines, on each of which the first two characters are ASCII digits '0' to '9' representing the length of the string, and the rest of the characters are the actual string. (If you're wondering about lines 7 and 9 above, they are “02! ” and “02? ” – they end with a space.) The last line contains a kind of hash (not a cryptographic one, just a simple check).
 
 All that the `POOLtype` program does is read this file, and print it again, in the following form:
 
@@ -121,7 +117,7 @@ So as you can see, it simply prints out the strings in the `tex.pool` file in a 
 * Strings 0 to 255 are the characters 0 to 255; the strings in the `tex.pool` file start at position 256.
 * Unprintable characters are shown using `^^x` escape codes.
 * The double-quote character `"` is printed as `""`.
-* The hash at the end of the file is verified.
+* The total count of characters printed is shown.
 
 Nevertheless, this trivial program provides some basic sanity testing to make sure that the TeX program would start up with the right `tex.pool` file and not something corrupted.
 
@@ -277,7 +273,7 @@ Here the code defines two very important arrays:
 
 - `xord`, whose keys (indices) are of type `text_char` and whose values are of type `ASCII_code`. When the program reads in a (system and encoding-dependent) “character” `c` (of type `text_char` = `char`, see previous section) from a text file, it is immediately translated to `xord[c]`, which is of type `ASCII_code`, the TeX-internal character code which (like Unicode) is independent of the encoding used.
 
-- `xchr`, whose keys (indices) are of type `ASCII_code` and whose values are of type `text_char`. When the program wants to write out a charcter `c` (of type `ASCII_code`, i.e. the TEX-internal character code that is independent of encoding), it is first translated to `xchr[c]`, which is of type `text_char`, the system and encoding-dependent one that is actually expected by the files on that system.
+- `xchr`, whose keys (indices) are of type `ASCII_code` and whose values are of type `text_char`. When the program wants to write out a character `c` (of type `ASCII_code`, i.e. the TEX-internal character code that is independent of encoding), it is first translated to `xchr[c]`, which is of type `text_char`, the system and encoding-dependent one that is actually expected by the files on that system.
 
 This is like the “Unicode sandwich” approach in Python mentioned earlier, where we call `decode(<encoding>)` immediately after reading from a file (converting from the encoding-specific byte sequence to “universal” Unicode codepoints) and call `encode(<encoding>)` just before writing out (encoding-specific) byte sequences to a file.
 
@@ -294,7 +290,7 @@ and such code is valid in Pascal.
 
 You can go back and refer to section 2 to see how this section is used, to remind yourself that this section starts the body of the `initialize` procedure. (There are more things to be initialized; see the "see also sections 10, 11, and 14" below.)
 
-There's a trick here, to why this doesn't need any system-dependent changes. For example, consider the assignment statement `xchr['101] = 'A'`, or (using decimal instead of octal) `xhcr[65] = 'A'`. Now, suppose this program was being compiled and run on a system that used EBCDIC encoding, where 'A' is encoded as byte 193. Then, this assignment statement would get interpreted and compiled as `xchr[65] = 193`. So that when TeX wants to translate from its internal code 65 (which always means 'A') to the system's encoding (to print out 'A' on the terminal or write it to a file), it would look up `xchr[65]`, find 193, and write out byte 193 to the file or terminal, and everything works as desired!
+There's a trick here, to why this doesn't need any system-dependent changes. For example, consider the assignment statement `xchr['101] = 'A'`, or (using decimal instead of octal) `xchr[65] = 'A'`. Now, suppose this program was being compiled and run on a system that used EBCDIC encoding, where 'A' is encoded as byte 193. Then, this assignment statement would get interpreted and compiled as `xchr[65] = 193`. So that when TeX wants to translate from its internal code 65 (which always means 'A') to the system's encoding (to print out 'A' on the terminal or write it to a file), it would look up `xchr[65]`, find 193, and write out byte 193 to the file or terminal, and everything works as desired!
 
 Changes are needed only if, for example, the character set (encoding) used does not contain, say `|`. Then the assignment `xchr[124] = '|'` should be changed to however it is proposed to print the character `|` (if it turns up) on that system.
 
@@ -354,7 +350,7 @@ Note that with WEB, we're able to keep the declaration and initialization close,
 
 <object type="image/svg+xml" data="pooltype-15.svg"></object>
 
-Recall that section 2 only had an outline of the top of the program. Everything in it has now been filled (except some globals yet to be clared), and this is the rest. The “main” of the program is above, between `begin` and `end`, with certain placeholders that will be filled by sections 16 and 19. Note that `initialize` is a procedure call. The macro `abort` is defined here (so that we can understand what the `goto 9999` in it is referring to), but we'll just keep it in mind for now; it's used later.
+Recall that section 2 only had an outline of the top of the program. Everything in it has now been filled (except some globals yet to be declared), and this is the rest. The “main” of the program is above, between `begin` and `end`, with certain placeholders that will be filled by sections 16 and 19. Note that `initialize` is a procedure call. The macro `abort` is defined here (so that we can understand what the `goto 9999` in it is referring to), but we'll just keep it in mind for now; it's used later.
 
 <object type="image/svg+xml" data="pooltype-16.svg"></object>
 
@@ -363,7 +359,7 @@ The arithmetic in `lc_hex` (set `l` to the lowercase hex representation of a num
     l := n;
     if l < 10 then l := l + 48 else l := l + 87
 
-The code is reasonably straightforward, especialy if you keep in mind what the goal is, but a few peculiarities (of Pascal and of WEB) are worth calling out:
+The code is reasonably straightforward, especially if you keep in mind what the goal is, but a few peculiarities (of Pascal and of WEB) are worth calling out:
 
 - `write(k : 3, ': ')` means to write `k` to width at least `3`, and then print the string `': '` -- it looks like the `pooltype` that comes with TeX Live does not obey the `: 3` specifier. (MikTeX seems to.)
 
@@ -378,13 +374,13 @@ The formatting is also a bit weird: blocks have `begin` and `end` at the same in
 
 One line of code, but a system-dependent one (and on certain systems could be less trivial). The text part documents the previous section, sort of. The default is that characters 32 to 126 are printable and the rest not, but these are the character codes that it says must be printable:
 
-- octal '41 to '46 = decimal 33 to 38 = `!"#$%&` (used in error messages and the like)
+- octal `'41` to `'46` = decimal 33 to 38 = `!"#$%&` (used in error messages and the like)
 
-- octal '60 to '71 = decimal 48 to 57 = `0123456789`
+- octal `'60` to `'71` = decimal 48 to 57 = `0123456789`
 
-- octal '141 to '146 = decimal 97 to 102 = `abcdef` (used in hexdecimal)
+- octal `'141` to `'146` = decimal 97 to 102 = `abcdef` (used in hexadecimal)
 
-- octal '160 to '171 = decimal 112 to 121 = `pqrstuvwxy` (used for things like `pt` I guess?)
+- octal `'160` to `'171` = decimal 112 to 121 = `pqrstuvwxy` (used for things like `pt` I guess?)
 
 For fun, let's verify the number 80:
 
@@ -417,17 +413,19 @@ Straightforward code, though it's nice how the looping logic has been separated 
 
 <object type="image/svg+xml" data="pooltype-20.svg"></object>
 
+Note that though this is the last section with code, this is really the heart of the program.
+
 Again does the obvious thing, except for this one which I'm not sure whether it's trickery or normal for the time: what we'd write
 
     l := (cm - '0') * 10 + (cn - '0')
 
-is here written as (basically
+is here written as (basically)
 
     l := cm * 10 + cn - '0' * 11
 
 with Pascal seeing actually
 
-	l := cm * 10 + cn - 528
+	l := cm * 10 + cn - 48 * 11
 
 as TANGLE translates `"0"` into 48.
 
@@ -753,7 +751,7 @@ It so happens (see [1](http://pascal-central.com/ppl/chapter4.html#Myth6), [2](h
 
 ### The str_pool figure above
 
-It was generated with the following program typed into Prof. Philip Guo's fantastic pythontutor.com website:
+It was generated with the following program typed into Prof. Philip Guo's fantastic [pythontutor.com website](http://pythontutor.com/c.html#mode=edit):
 
 ```c
 char* str_start_pointers[5];
