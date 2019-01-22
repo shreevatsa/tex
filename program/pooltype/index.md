@@ -1,6 +1,6 @@
 <style>
 object {
-	border: 2px solid grey;
+    border: 2px solid grey;
     width: 100%;
 }
 img {
@@ -279,6 +279,19 @@ Here the code defines two very important arrays:
 
 This is like the “Unicode sandwich” approach in Python mentioned earlier, where we call `decode(<encoding>)` immediately after reading from a file (converting from the encoding-specific byte sequence to “universal” Unicode codepoints) and call `encode(<encoding>)` just before writing out (encoding-specific) byte sequences to a file.
 
+Here's an example with EBCDIC, in which 'A' is encoded as 193:
+
+    User's file on   --->   TeX reads               via xord
+    disk has 193             in 193            ---------------------->  65
+                          (via Pascal runtime)      system-dependent   (type: ASCII_code = 0..65)
+                          (type: text_char)
+
+and conversely:
+
+     65            via xchr
+     ASCII_code  ----------------->   193                -----> Output byte 193 to disk
+                   system-dependent  type:text_char              (via Pascal runtime)
+
 Note the Pascal feature, where array indices and values can be subrange types: for example on some system the type `text_char` might have been defined as range `32..126`, and of course `ASCII_code` was defined in section 5 above as the range `0..255`, so this is like saying:
 
     xord: array[32..126] of 0..255;
@@ -305,6 +318,8 @@ which today just looks wrong. See Markus Kuhn's page [ASCII and Unicode quotatio
 ----
 
 <object type="image/svg+xml" data="pooltype-09.svg"></object>
+
+These are decimal 0, 13 and 127 respectively, or hexadecimal 0, 0A, and 7F respectively, aka `\0`, `\n` and (say) `\x7F` or `\0177`.
 
 Incidentally, `null_code` and `carriage_return`, though defined here as WEB macros, are not actually used in the program.
 
@@ -334,11 +349,17 @@ The order of these two loops ensures that if there are multiple internal charact
 
 so that printable ASCII codes (32 to 126) are most preferred.
 
+In other words:
+
+$$\mathtt{xord[c]} = \begin{cases} i, & \text{most preferred $i$ such that }\mathtt{xchr[i] = c}\text{, if any}, \\[2ex] \mathtt{127}, & \text{otherwise}\end{cases}$$
+
 ### Part 3: String handling
 
 Finally, after half the program is done, we come to the main part of this program.
 
 <object type="image/svg+xml" data="pooltype-12.svg"></object>
+
+(Part of sequence: 7, 12, 13, 18.)
 
 Global variables are always a pain to understand. By convention, single-letter variables are for unimportant things like loop indices or temporary variables.
 
@@ -348,11 +369,13 @@ One thing that helps understand these programs is think about what needs to be d
 
 <object type="image/svg+xml" data="pooltype-14.svg"></object>
 
+(Part of sequence: 8, 10, 11, 14.)
+
 Note that with WEB, we're able to keep the declaration and initialization close, even though they're textually far apart in the actual program that Pascal sees.
 
 <object type="image/svg+xml" data="pooltype-15.svg"></object>
 
-Recall that section 2 only had an outline of the top of the program. Everything in it has now been filled (except some globals yet to be declared), and this is the rest. The “main” of the program is above, between `begin` and `end`, with certain placeholders that will be filled by sections 16 and 19. Note that `initialize` is a procedure call. The macro `abort` is defined here (so that we can understand what the `goto 9999` in it is referring to), but we'll just keep it in mind for now; it's used later.
+Recall that section 2 only had an outline of the top of the program. Everything in it has now been filled (except some globals yet to be declared), and this is the rest. The “main” of the program is above, between `begin` and `end`, with certain placeholders that will be filled by sections 16 and 19. Note that `initialize` is a procedure call (and we'd probably write it on the line after `begin`). The macro `abort` is defined here (so that we can understand what the `goto 9999` in it is referring to), but we'll just keep it in mind for now; it's used later.
 
 <object type="image/svg+xml" data="pooltype-16.svg"></object>
 
@@ -365,12 +388,15 @@ The code is reasonably straightforward, especially if you keep in mind what the 
 
 - `write(k : 3, ': ')` means to write `k` to width at least `3`, and then print the string `': '` -- it looks like the `pooltype` that comes with TeX Live does not obey the `: 3` specifier. (MikTeX seems to.)
 
+- `xchr["^"]` is a WEB feature; it means `xchr[94]`
+
+- The `count := count + 2` is because of the `^^` that were printed.
+
 - Unprintable characters in range 0 to 63 are escaped by adding 64 (using counterparts in range 64 to 127); those in range 64 to 127 are escaped by subtracting 64 (using counterparts in range 0 to 63), and those 128 or more are escaped with two hex characters.
 
 - The condition for “k is unprintable” is moved to a separate section, so that it can be given a more elaborate comment, and also so that system-dependent changes to it don't make the section too long. (Also, so that only it can be marked system-dependent, rather than the whole section 16.)
 
 The formatting is also a bit weird: blocks have `begin` and `end` at the same indent but within them the first statement after `begin` tends to start to the right of the `begin`, and in generation the statements are just lumped together on the line for no apparent reason. (This was considered desirable, it [appears](https://i.stack.imgur.com/jA9q7.png).)
-
 
 <object type="image/svg+xml" data="pooltype-17.svg"></object>
 
@@ -427,19 +453,25 @@ is here written as (basically)
 
 with Pascal seeing actually
 
-	l := cm * 10 + cn - 48 * 11
+    l := cm * 10 + cn - 48 * 11
 
 as TANGLE translates `"0"` into 48.
 
 Anyway, this is the end of the program, so I guess it doesn't verify the hash code either. Oh well.
 
+### Part 4: System dependencies
+
 <object type="image/svg+xml" data="pooltype-21.svg"></object>
 
 If someone wants to add new sections to the program, best to add them at the end.
 
+### Part 5: Index
+
 <object type="image/svg+xml" data="pooltype-22.svg"></object>
 
 Apart from variables and macros, also topics and mentions of books/people are indexed, and “character set dependencies” and “system dependencies”. The underline means that the variable/macro was defined in that section.
+
+When reading a WEB program, it is often necessary to flip back and forth to the index.
 
 <object type="image/svg+xml" data="pooltype-23.svg"></object>
 
@@ -507,37 +539,37 @@ if not eof(poolfile)then begin writeln(
 writeln('(',count:1,' characters in all.)');9999:end.{:15}
 ```
 
-and this is the output with some formatting:
+and this is the above with some formatting:
 
 ```pascal
 {2:}
-program POOLtype(poolfile,output);
+program POOLtype(poolfile, output);
 label 9999;
 type
    {5:}
-   ASCIIcode=0..255;
+   ASCIIcode = 0..255;
    {:5}
 var
    {7:}
-   xord:array[char]of ASCIIcode;
-   xchr:array[ASCIIcode]of char;
+   xord: array[char] of ASCIIcode;
+   xchr: array[ASCIIcode] of char;
    {:7}
    {12:}
-   k,l:0..255;
-   m,n:char;
-   s:integer;
+   k, l: 0..255;
+   m, n: char;
+   s: integer;
    {:12}
    {13:}
-   count:integer;
+   count: integer;
    {:13}
    {18:}
-   poolfile:packed file of char;
-   xsum:boolean;
+   poolfile: packed file of char;
+   xsum: boolean;
    {:18}
 procedure initialize;
 var
    {6:}
-   i:integer;
+   i: integer;
    {:6}
 begin
    {8:}
@@ -564,16 +596,16 @@ begin
    xchr[125]:='}';xchr[126]:='~';
    {:8}
    {10:}
-   for i:=0 to 31 do xchr[i]:=' ';
-   for i:=127 to 255 do xchr[i]:=' ';
+   for i:=0 to 31 do xchr[i] := ' ';
+   for i:=127 to 255 do xchr[i] := ' ';
    {:10}
    {11:}
-   for i:=0 to 255 do xord[chr(i)]:=127;
-   for i:=128 to 255 do xord[xchr[i]]:=i;
-   for i:=0 to 126 do xord[xchr[i]]:=i;
+   for i:=0 to 255 do xord[chr(i)] := 127;
+   for i:=128 to 255 do xord[xchr[i]] := i;
+   for i:=0 to 126 do xord[xchr[i]] := i;
    {:11}
    {14:}
-   count:=0;
+   count := 0;
    {:14}
 end;
 {:2}
@@ -583,38 +615,38 @@ begin
    {16:}
    for k:=0 to 255 do
    begin
-      write(k:3,': "');
-      l:=k;
-      if({17:}(k<32)or(k>126){:17}) then
+      write(k:3, ': "');
+      l := k;
+      if({17:}(k<32) or (k>126){:17}) then
       begin
-         write(xchr[94],xchr[94]);
+         write(xchr[94], xchr[94]);
          if k<64 then
-            l:=k+64
+            l := k+64
          else if k<128 then
-            l:=k-64
+            l := k-64
          else
          begin
-            l:=k div 16;
-            if l<10 then l:=l+48 else l:=l+87;
+            l := k div 16;
+            if l < 10 then l := l + 48 else l := l + 87;
             write(xchr[l]);
-            l:=k mod 16;
-            if l<10 then l:=l+48 else l:=l+87;
-            count:=count+1;
+            l := k mod 16;
+            if l < 10 then l := l + 48 else l := l + 87;
+            count := count + 1;
          end;
-         count:=count+2;
+         count := count + 2;
       end;
-      if l=34 then
-         write(xchr[l],xchr[l])
+      if l = 34 then
+         write(xchr[l], xchr[l])
       else
          write(xchr[l]);
-      count:=count+1;
+      count := count + 1;
       writeln('"');
    end
    {:16};
-   s:=256;
+   s := 256;
    {19:}
    reset(poolfile);
-   xsum:=false;
+   xsum := false;
    if eof(poolfile) then
    begin
       writeln('! I can''t read the POOL file.');
@@ -627,17 +659,17 @@ begin
          writeln('! POOL file contained no check sum');
          goto 9999;
       end;
-      read(poolfile,m,n);
+      read(poolfile, m, n);
       if m<>'*'then
       begin
-         if(xord[m]<48)or(xord[m]>57)or(xord[n]<48)or(xord[n]>57)then
+         if(xord[m] < 48) or (xord[m] > 57) or (xord[n] < 48) or (xord[n] > 57) then
          begin
             writeln('! POOL line doesn''t begin with two digits');
             goto 9999;
          end;
-         l:=xord[m]*10+xord[n]-48*11;
-         write(s:3,': "');
-         count:=count+l;
+         l := xord[m]*10 + xord[n] - 48*11;
+         write(s:3, ': "');
+         count := count + l;
          for k:=1 to l do
          begin
             if eoln(poolfile) then
@@ -648,16 +680,16 @@ begin
                   goto 9999;
                end;
             end;
-            read(poolfile,m);
+            read(poolfile, m);
             write(xchr[xord[m]]);
-            if xord[m]=34 then
+            if xord[m] = 34 then
                write(xchr[34]);
          end;
          writeln('"');
-         s:=s+1;
+         s := s+1;
       end
       else
-         xsum:=true;
+         xsum := true;
       readln(poolfile)
       {:20};
    until xsum;
@@ -667,7 +699,7 @@ begin
       goto 9999;
    end
    {:19};
-   writeln('(',count:1,' characters in all.)');
+   writeln('(', count:1, ' characters in all.)');
 9999:
 end.
 {:15}
@@ -709,11 +741,11 @@ There were other problems that Kernighan identified with standard Pascal as of 1
 
 - Procedures must be declared (body and all) before they are used; all declarations of the same kind (e.g. all type declarations) should be grouped together — and need to come up with names for ad-hoc types
 
-	With literate programming, this is solved: one can write one's program in practically any order.
+    With literate programming, this is solved: one can write one's program in practically any order.
 
 - If a procedure modifies its argument (“var” parameters), this is not clear at the caller. (Incidentally this is why the [Google C++ style guide bans non-const references as function parameters](https://google.github.io/styleguide/cppguide.html#Reference_Arguments).)
 
-	Solved by DEK by just never using `var` (mutating) parameters except for files.
+    Solved by DEK by just never using `var` (mutating) parameters except for files.
 
 - set types can be non-portable
   
@@ -721,27 +753,27 @@ There were other problems that Kernighan identified with standard Pascal as of 1
 
 - “it is not possible to write programs like storage allocators or I/O systems”
 
-	TeX does all its own memory allocation
+    TeX does all its own memory allocation
 
 - There is no “break” for exiting loops, nor “return” for exiting a function, and no default `case` label
 
-	Done with `define` and `goto` -- DEK basically invents his own few control structures ("break", "return", "reswitch", "restart") and implements them with "goto".
+    Done with `define` and `goto` -- DEK basically invents his own few control structures ("break", "return", "reswitch", "restart") and implements them with "goto".
 
 - I/O and file handling are complicated
 
-	Just do it :-)
+    Just do it :-)
 
 - The language has pointer types and “new” but they have problems (cannot allocate arrays of non-fixed size… “I found relatively little use for pointers.”)
 
-	DEK does not use pointers or `new`.
+    DEK does not use pointers or `new`.
 
 - there is no macro processor
 
-	WEB (TANGLE) is the macro processor.
+    WEB (TANGLE) is the macro processor.
 
 - cannot put expressions in declarations (e.g. an array of size “n + 1” where “n” is known at compile time)
 
-	WEB (TANGLE) allows this.
+    WEB (TANGLE) allows this.
 
 Overall, Kernighan concluded: 
 
