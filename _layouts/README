@@ -1,0 +1,4 @@
+Copied from vendor/bundle/ruby/2.3.0/gems/jekyll-theme-primer-0.5.3/_layouts/default.html
+(which seems to be the default that GitHub uses) and changed the h1 to contain page title
+instead of site title.
+
