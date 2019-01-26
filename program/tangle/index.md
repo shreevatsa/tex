@@ -14,6 +14,14 @@ After having studied [`POOLtype`](../pooltype), we shall now study [TANGLE](http
 
 (fill this in)
 
+- Above reasons
+
+- DEK himself alludes to (or compares with) the TeX program in a few places.
+
+- It illustrates many things about the TeX program and the way DEK thinks, e.g. describing data-structures and how to use them, before describing how to populate them.
+
+## Table of contents
+
 Because of its length, let's study each part separately. For convenience they are linked here:
 
 - [1. Introduction](tangle-1) 1
