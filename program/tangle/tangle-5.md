@@ -124,3 +124,43 @@ So let's keep track of the total info we need to keep for each name:
     - type code, i.e. the integer 0 (stored in `ilk` array)
 
 As we can see, DEK only needs three arrays `equiv`, `link` and `ilk` (the last of these could be 2 bits in most cases but is unconditionally 16 bits) to store all the additional info for each name.
+
+<object type="image/svg+xml" data="tangle-037.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-038.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-039.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-040.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-041.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-042.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-043.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-044.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-045.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-046.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-047.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-048.svg"></object>
+
+
+<object type="image/svg+xml" data="tangle-049.svg"></object>
+
+

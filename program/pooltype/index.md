@@ -1,3 +1,7 @@
+---
+title: POOLtype
+---
+
 <style>
 object {
     border: 2px solid grey;
@@ -29,6 +33,8 @@ String pools were his solution to the string problem: in his program he simply d
 For example, suppose you have four strings “zeroth”, “first”, “2nd”, and “this is third”. They might go into the `str_pool` and `str_start` arrays as follows (I added the `str_start_pointers` array just for clarity in case it helps; it's a version of `str_start` that uses pointers instead of indices… the TeX program does not use Pascal's pointer types, and uses only integer indices but calls them pointers):
 
 [![str_pool_via_pythontutor](str_pool.png)](str_pool.png)
+
+For example, string 3 consists of the characters from position `str_start[3]` (= 14) of the `str_pool` array, to the position `str_start[4] - 1` (= 26). The variables `pool_ptr` and `str_ptr` are the next indices that are going to be populated (for the next string we want to insert), in the `str_pool` and `str_start` arrays respectively.
 
 Apart from strings that the program needs to construct at runtime, there are also strings that are part of the program itself: error messages and the like. These are populated into the string pool at the start of the program, via the mechanism of the WEB preprocessor (the `TANGLE` program) dumping them to a `.pool` file, and the program containing code to read from the `.pool` file at startup, to populate its string pool.
 
@@ -118,10 +124,10 @@ So as you can see, it simply prints out the strings in the `tex.pool` file in a 
 
 * Strings 0 to 255 are the characters 0 to 255; the strings in the `tex.pool` file start at position 256.
 * Unprintable characters are shown using `^^x` escape codes.
-* The double-quote character `"` is printed as `""`.
-* The total count of characters printed is shown.
+* The double-quote character `"` is printed as `""` (this was a Pascal convention; C would use `\"`).
+* The total count of characters printed is shown at the end.
 
-Nevertheless, this trivial program provides some basic sanity testing to make sure that the TeX program would start up with the right `tex.pool` file and not something corrupted.
+Nevertheless, this trivial program provides some basic ~~sanity testing to make sure that the TeX program would start up with the right `tex.pool` file and not something corrupted~~ debugging help, e.g. in finding out what string 340 means.
 
 ## A Python implementation
 
@@ -201,7 +207,7 @@ How `POOLtype` could be useful when a program is being debugged: suppose you see
 
 The “people may want to try transporting this program” refers to people who were (what we'd now call) sysadmins at other places / computer systems, installing TeX for their users — they'd have to adapt TeX with (hopefully minimal) “system-dependent changes” specific to their system, and the idea is that this program POOLtype is good practice for doing so.
 
-Finally, note “routines copied from $\mathrm{\TeX82}$”. DEK is pretty free about copying code between different programs, where most of us programmers today would go to great lengths to avoid doing so.
+Finally, note “routines copied from TeX82”. DEK is pretty free about copying code between different programs, where most of us programmers today would go to great lengths to avoid doing so.
 
 Anyway, enough exegesis on three sentences; let's move on to Section 2.
 
@@ -231,7 +237,7 @@ Moving on to section 3.
 
 This section has text, followed by WEB macro definitions (no Pascal code). WEB has macros, with which DEK basically extends the programming language. Part of the popularity of C over Pascal must come from things like C having increment/decrement operators, and being able to write a semicolon to denote an empty statement. :-)
 
-And with that, we're already done with Part 1, introduction. The code we saw so far was the outline in section 2 above.
+And with that, we're already done with Part 1, introduction. The only code we saw so far was the outline in section 2 above.
 
 ### Part 2: The character set
 
@@ -814,3 +820,6 @@ int main() {
 }
 ```
 
+<script type="text/javascript"
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
