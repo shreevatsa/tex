@@ -71,7 +71,9 @@ Before we start studying the TANGLE program itself, let's take a few minutes to 
 
 ## Table of contents
 
-Because of its length, let's study each part separately. I've grouped the 20 sections into what seem to me to be natural places.
+<object type="image/svg+xml" data="tangle-contents.svg"></object>
+
+Because of its length, let's study each part separately. I've grouped the 20 parts into what seem to me to be natural places.
 
 - [1. Introduction](tangle-1) 1
 - [2. The character set](tangle-2) 11
