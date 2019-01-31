@@ -10,8 +10,57 @@ object {
 img {
     max-width: 100%;
 }
-</style>
 
+/* https://css-tricks.com/full-width-containers-limited-width-parents/ */
+.full-width {
+  width: 96vw;
+  position: relative;
+  left: 48%;
+  right: 48%;
+  margin-left: -48vw;
+  margin-right: -48vw;
+}
+
+.startArray {
+    overflow-x: scroll;
+    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
+}
+.memArray {
+    overflow-x: scroll;
+    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
+}
+.startCell {
+    border: 2px solid grey;
+    display: inline-block;
+    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+}
+.memCell {
+    border: 2px solid grey;
+    display: inline-block;
+    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+}
+.cellIndex {
+    margin: 1px; padding: 1px;
+    font-size: 50%;
+    text-align: center;
+}
+.cellRaw {
+    margin: 1px; padding: 1px;
+    font-family: monospace;
+    font-size: 50%;
+    text-align: center;
+}
+.cellShow {
+    margin: 1px; padding: 1px;
+    text-align: center;
+}
+.pointed {
+    background-color: red;
+}
+.pointNext {
+    background-color: grey;
+}
+</style>
 
 (This is sections 70 to 76; see below, after 76, for comments.)
 
@@ -76,3 +125,10 @@ For example, after reading 2000 lines of `tex.web`, these are the contents of th
       280, 1440, 274, 421, 183, 286, 1449, 276, 507, 188, 530, 1450, 277, 534, 244, 545, 1461, 301, 540, 272, 607, 1482, 433, 690, 360, 640, 1608, 449, 702, 392, 722, 1931, 658, 786, 415,
       730, 1939, 664, 794, 423, 736, 2040, 964, 1038, 525, 801, 2108, 1020, 1116, 715, 862, 2186, 1022, 1370, 776, 878, 2287, 1051, 1381, 784, 901, 2320, 1070, 1467, 794, 911, 2330, 1080,
       1477, 804, 915, 2339, 1089, 1486, 813, 924, 2348, 1119, 1499, 830, 1047, 2411, 1295, 1561, 925, 1129, 0 <repeats 9872 times>}
+
+What this means.
+
+<div id="whereToAddDivs" class="full-width"></div>
+
+<script src="pretty-8.js"></script>
+
