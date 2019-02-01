@@ -60,6 +60,11 @@ img {
 .pointNext {
     background-color: grey;
 }
+.tokensrow {
+    border: 2px solid grey;
+    display: block;
+    white-space: nowrap; /* So that a div containing just a space does not collapse */
+}
 </style>
 
 (This is sections 70 to 76; see below, after 76, for comments.)
@@ -130,5 +135,13 @@ What this means.
 
 <div id="whereToAddDivs" class="full-width"></div>
 
+And here it is in more readable form:
+
+<div id="whereToAddDivsBetter" class="full-width"></div>
+
+<script src="tangle-mem.js"></script>
 <script src="pretty-8.js"></script>
 
+To make it even more readable, we'd have to pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved.
+
+[TODO: next steps here for me: unify my hacky pretty-5.js and pretty-8.js (or at least put them in the same file); instead of directly writing out the divs, try to make well-defined transformations on the data to another format.]
