@@ -1,27 +1,72 @@
-/*
-Utilities for parsing and displaying the internal memory of TANGLE.
+/**
+* @fileoverview Utilities for parsing and displaying the internal memory of TANGLE.
 */
-// Byte memory
-// ===========
-// Given arrays |b| (itself containing |ww|=3 byte arrays) and |bs| (containing integer indices into the arrays in |b|),
-// transform into a single map from index to string.
-function listStrings(b, bs) {
-    // This implementation creates new memory holding the strings. If it turns out
+String.prototype.byteAt = function (n) {
+    return this.charCodeAt(n);
+};
+/**
+* Byte memory (names: double-quoted strings, and names of modules, macros, Pascal identifiers and keywords)
+* @param byte_mem itself contains |ww|=3 byte arrays
+* @param byte_start contains integer indices into the arrays in |byte_mem|
+* @returns The list of names that the arrays |byte_mem| and |byte_start| represent.
+*/
+function listNames(byte_mem, byte_start) {
+    // Note for future: This implementation creates new memory holding the strings. If it turns out
     // to be expensive for some reason, can change this to something that returns
-    // a function that given i, returns string i.
-    var ww = b.length;
+    // a function that given i, returns name i.
+    var ww = byte_mem.length;
     var ret = [];
-    for (var i = 0; i < bs.length; ++i) {
+    // Name i occupies positions byte_start[i] to byte_start[i + ww], in byte_mem[w][].
+    for (var i = 0; i < byte_start.length - ww; ++i) {
         var w = i % ww;
-        // String i occupies positions bs[i] to bs[i + ww], in b[w].
-        if (i + ww >= bs.length)
-            continue;
-        if (i != ret.length)
-            throw "Skipped over some element?" + i + " " + ret.length;
-        var s = [];
-        for (var j = bs[i]; j < bs[i + ww]; ++j)
-            s.push(b[w][j]);
-        ret.push(s);
+        ret.push(byte_mem[w].slice(byte_start[i], byte_start[i + ww]));
+    }
+    return ret;
+}
+// For a cell (string index / char), output its [index, value, show, id]
+function pretty_cell(id_prefix, s, n) {
+    var c = s.byteAt(n);
+    if (c < 32 || c >= 127)
+        throw "Decide what to do with unprintable characters like: " + c;
+    return {
+        index: n,
+        rawValue: two_hex(s.byteAt(n)),
+        show: s[n],
+        id: id_prefix + "_" + n
+    };
+}
+function pretty_array(id_prefix, s) {
+    var ret = Array.prototype.map.call(s, function (c, i) { return pretty_cell(id_prefix, s, i); });
+    ret.push({ index: s.length, value: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length });
+    return ret;
+}
+// What we want:
+// One div for each array -- a div for each cell, each with an id.
+// One div for the "start" array -- a div for each cell, with onclick / onhover events.
+// Returns a HTML node.
+function memArrayDiv(array) {
+    var d = document.createElement('div');
+    d.classList.add('memArray');
+    d.classList.add('hbox');
+    for (var _i = 0, array_1 = array; _i < array_1.length; _i++) {
+        var cell = array_1[_i];
+        var dd = document.createElement('div');
+        dd.classList.add('memCell');
+        dd.id = cell.id;
+        dd.innerHTML = ("<div class=\"cellIndex\">" + cell.index + "</div>" +
+            ("<div class=\"cellShow\">" + cell.show + "</div>") +
+            ("<div class=\"cellRaw\">" + (cell.rawValue != undefined ? cell.rawValue : ' ') + "</div>"));
+        d.appendChild(dd);
+    }
+    return d;
+}
+// For each cell in the start array, output its [index, array_num, start_index, id, start_id]
+function pretty_start(start, m) {
+    var ret = [];
+    for (var i = 0; i < start.length; ++i) {
+        var w = i % m;
+        var tmp = [i, w, start[i], "b" + w + "_" + start[i], "b" + w + "_" + start[i + m]];
+        ret.push(tmp);
     }
     return ret;
 }
@@ -45,11 +90,11 @@ function listTexts(t, ts) {
         var j = ts[i];
         while (j < ts[i + zz]) {
             if (t[z].charCodeAt(j) < 128) {
-                s.push([t[z].charCodeAt(j)]);
+                s.push([t[z].byteAt(j)]);
                 j += 1;
             }
             else {
-                s.push([t[z].charCodeAt(j), t[z].charCodeAt(j + 1)]);
+                s.push([t[z].byteAt(j), t[z].byteAt(j + 1)]);
                 j += 2;
             }
             // console.log('Added token', s[s.length - 1]);
@@ -129,9 +174,12 @@ var pooltypeMem = {
         "\x00\x18\x00-1\xd0\x07\x80\x19:\x80\x1a[\x80\x14]\x80\x1b\x80\x13;\x80\x1c:\x80\x1a[\x80\x13]\x80\x1b\x80\x14;\xd0\x0d\x80$:\x80\x18;\xd0\x10\x80 k\x180\x80!255\x80\"\x80\x0d\x800(k:3,': \"');l\x18k;\x80+(\xa81)\x80,\x80\x0d\x800(\x80\x1c[\x802],\x80\x1c[\x802]);\x80+k<\x0c100\x80,l\x18k+\x0c100\x80.\x80+k<\x0c200\x80,l\x18k-\x0c100\x80.\x80\x0d\x80*(k\x80316);\x800(\x80\x1c[l]);\x80*(k\x80416);\x80\x10(\x80$);\x80\x0f;\x80$\x18\x80$+2;\x80\x0f;\x80+l=\x805\x80,\x800(\x80\x1c[l],\x80\x1c[l])\x80.\x800(\x80\x1c[l]);\x80\x10(\x80$);\x80&('\"');\x80\x0f",
         "\xd0\x08\x80\x1c[\x0c40]\x18' ';\x80\x1c[\x0c41]\x18'!';\x80\x1c[\x0c42]\x18'\"';\x80\x1c[\x0c43]\x18'#';\x80\x1c[\x0c44]\x18'$';\x80\x1c[\x0c45]\x18'%';\x80\x1c[\x0c46]\x18'&';\x80\x1c[\x0c47]\x18'''';\x80\x1c[\x0c50]\x18'(';\x80\x1c[\x0c51]\x18')';\x80\x1c[\x0c52]\x18'*';\x80\x1c[\x0c53]\x18'+';\x80\x1c[\x0c54]\x18',';\x80\x1c[\x0c55]\x18'-';\x80\x1c[\x0c56]\x18'.';\x80\x1c[\x0c57]\x18'/';\x80\x1c[\x0c60]\x18'0';\x80\x1c[\x0c61]\x18'1';\x80\x1c[\x0c62]\x18'2';\x80\x1c[\x0c63]\x18'3';\x80\x1c[\x0c64]\x18'4';\x80\x1c[\x0c65]\x18'5';\x80\x1c[\x0c66]\x18'6';\x80\x1c[\x0c67]\x18'7';\x80\x1c[\x0c70]\x18'8';\x80\x1c[\x0c71]\x18'9';\x80\x1c[\x0c72]\x18':';\x80\x1c[\x0c73]\x18';';\x80\x1c[\x0c74]\x18'<';\x80\x1c[\x0c75]\x18'=';\x80\x1c[\x0c76]\x18'>';\x80\x1c[\x0c77]\x18'?';\x80\x1c[\x0c100]\x18'@';\x80\x1c[\x0c101]\x18'A';\x80\x1c[\x0c102]\x18'B';\x80\x1c[\x0c103]\x18'C';\x80\x1c[\x0c104]\x18'D';\x80\x1c[\x0c105]\x18'E';\x80\x1c[\x0c106]\x18'F';\x80\x1c[\x0c107]\x18'G';\x80\x1c[\x0c110]\x18'H';\x80\x1c[\x0c111]\x18'I';\x80\x1c[\x0c112]\x18'J';\x80\x1c[\x0c113]\x18'K';\x80\x1c[\x0c114]\x18'L';\x80\x1c[\x0c115]\x18'M';\x80\x1c[\x0c116]\x18'N';\x80\x1c[\x0c117]\x18'O';\x80\x1c[\x0c120]\x18'P';\x80\x1c[\x0c121]\x18'Q';\x80\x1c[\x0c122]\x18'R';\x80\x1c[\x0c123]\x18'S';\x80\x1c[\x0c124]\x18'T';\x80\x1c[\x0c125]\x18'U';\x80\x1c[\x0c126]\x18'V';\x80\x1c[\x0c127]\x18'W';\x80\x1c[\x0c130]\x18'X';\x80\x1c[\x0c131]\x18'Y';\x80\x1c[\x0c132]\x18'Z';\x80\x1c[\x0c133]\x18'[';\x80\x1c[\x0c134]\x18'\\';\x80\x1c[\x0c135]\x18']';\x80\x1c[\x0c136]\x18'^';\x80\x1c[\x0c137]\x18'_';\x80\x1c[\x0c140]\x18'`';\x80\x1c[\x0c141]\x18'a';\x80\x1c[\x0c142]\x18'b';\x80\x1c[\x0c143]\x18'c';\x80\x1c[\x0c144]\x18'd';\x80\x1c[\x0c145]\x18'e';\x80\x1c[\x0c146]\x18'f';\x80\x1c[\x0c147]\x18'g';\x80\x1c[\x0c150]\x18'h';\x80\x1c[\x0c151]\x18'i';\x80\x1c[\x0c152]\x18'j';\x80\x1c[\x0c153]\x18'k';\x80\x1c[\x0c154]\x18'l';\x80\x1c[\x0c155]\x18'm';\x80\x1c[\x0c156]\x18'n';\x80\x1c[\x0c157]\x18'o';\x80\x1c[\x0c160]\x18'p';\x80\x1c[\x0c161]\x18'q';\x80\x1c[\x0c162]\x18'r';\x80\x1c[\x0c163]\x18's';\x80\x1c[\x0c164]\x18't';\x80\x1c[\x0c165]\x18'u';\x80\x1c[\x0c166]\x18'v';\x80\x1c[\x0c167]\x18'w';\x80\x1c[\x0c170]\x18'x';\x80\x1c[\x0c171]\x18'y';\x80\x1c[\x0c172]\x18'z';\x80\x1c[\x0c173]\x18'{';\x80\x1c[\x0c174]\x18'|';\x80\x1c[\x0c175]\x18'}';\x80\x1c[\x0c176]\x18'~';\xd0\x0e\x80$\x180;\xd0\x11(k<\x806)\x807(k>\x808)",
     ],
-    ts: [0, 0, 0, 0, 0, 0, 45, 5, 5, 0, 11, 47, 12, 35, 1206, 61, 127, 36, 43, 1213, 78, 190, 65, 250, 1229, 98, 315, 435]
+    ts: [0, 0, 0, 0, 0, 0, 45, 5, 5, 0, 11, 47, 12, 35, 1206, 61, 127, 36, 43, 1213, 78, 190, 65, 250, 1229, 98, 315, 435],
+    equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15, 0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0, 1073741881, 0],
+    text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0]
 };
-pooltypeMem['names'] = listStrings(pooltypeMem.b, pooltypeMem.bs);
+pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
+console.log('The first name is: ', pooltypeMem['names'][1]);
 pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts).map(function (text) { return text.map(function (token) { return parseToken(token); }); });
 // Not even related to TANGLE
 // ==========================
@@ -151,3 +199,19 @@ function one_hex(n) { if (n < 0 || n >= 16)
     throw "Not a hex digit: " + n; return n.toString(16); }
 function two_hex(n) { if (n < 0 || n >= 256)
     throw "Not a byte: " + n; return one_hex((n - n % 16) / 16) + one_hex(n % 16); }
+// This block copied from https://gist.github.com/hsablonniere/2581101
+if (!('scrollIntoViewIfNeeded' in Element.prototype)) {
+    Element.prototype['scrollIntoViewIfNeeded'] = function (centerIfNeeded) {
+        centerIfNeeded = arguments.length === 0 ? true : !!centerIfNeeded;
+        var parent = this.parentNode, parentComputedStyle = window.getComputedStyle(parent, null), parentBorderTopWidth = parseInt(parentComputedStyle.getPropertyValue('border-top-width')), parentBorderLeftWidth = parseInt(parentComputedStyle.getPropertyValue('border-left-width')), overTop = this.offsetTop - parent.offsetTop < parent.scrollTop, overBottom = (this.offsetTop - parent.offsetTop + this.clientHeight - parentBorderTopWidth) > (parent.scrollTop + parent.clientHeight), overLeft = this.offsetLeft - parent.offsetLeft < parent.scrollLeft, overRight = (this.offsetLeft - parent.offsetLeft + this.clientWidth - parentBorderLeftWidth) > (parent.scrollLeft + parent.clientWidth), alignWithTop = overTop && !overBottom;
+        if ((overTop || overBottom) && centerIfNeeded) {
+            parent.scrollTop = this.offsetTop - parent.offsetTop - parent.clientHeight / 2 - parentBorderTopWidth + this.clientHeight / 2;
+        }
+        if ((overLeft || overRight) && centerIfNeeded) {
+            parent.scrollLeft = this.offsetLeft - parent.offsetLeft - parent.clientWidth / 2 - parentBorderLeftWidth + this.clientWidth / 2;
+        }
+        if ((overTop || overBottom || overLeft || overRight) && !centerIfNeeded) {
+            this.scrollIntoView(alignWithTop);
+        }
+    };
+}

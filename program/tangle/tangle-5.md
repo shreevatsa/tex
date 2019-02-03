@@ -24,11 +24,11 @@ Specifically, we need the following kinds of strings (lists of characters):
 
 - The double-quoted strings that TANGLE is supposed to translate into (string pool) numbers, like `"A"` into `65`. (There aren't any of length > 1 in the TANGLE program itself, but there are many in TeX of course.)
 
-- The identifiers in the program (e.g. variable or function names), like `limit` (the name of a variable) or `error` (the name of a procedure).
+- The identifiers in the program, like `limit` (the name of a variable) or `error` (the name of a procedure), or `begin` (a Pascal keyword).
 
 All of these "names" (strings, names of identifiers/macros, names of modules) are stored in a huge array called `byte_mem[][]`: for every integer `i` up to the number of names stored, the name `i` occupies positions `byte_mem[i%ww][byte_start[i]]` to `byte_mem[i%ww][byte_start[i+ww] - 1]`.
 
-Such integers `i` from `0` to the number of names stored (= `name_ptr` $\le$ `max_names`) are said to be of type `name_pointer`.
+Such integers `i` from `0` to the number of names stored (= `name_ptr` ≤ `max_names`) are said to be of type `name_pointer`.
 
 For example, after reading about 2250 lines of `tex.web`, these are the contents of the `byte_mem` and `byte_start` arrays:
 
@@ -45,11 +45,11 @@ $18 = "mtypeTEXconstvarinitializeInitialize whatever \\TeX\\ might accessError h
 $20 = {0, 0, 0, 0, 6, 5, 19, 13, 8, 24, 38, 13, 52, 62, 16, 68, 71, 26, 102, 76, 64, 105, 101, 89, 117, 111, 98, 122, 116, 102, 126, 120, 106, 161, 170, 116, 167, 178, 123, 174, 186, 133, 189, 200, 143, 200, 208, 156, 210, 217, 167, 226, 226, 176, 235, 238, 188, 249, 247, 195, 256, 256, 204, 266, 265, 207, 273, 310, 209, 275, 314, 212, 279, 321, 220, 287, 325, 225, 292, 330, 230, 297, 335, 235, 303, 341, 244, 316, 345, 248, 322, 349, 253, 326, 351, 263, 332, 355, 268, 342, 364, 272, 357, 378, 276, 362, 380, 280, 371, 395, 292, 374, 397, 295, 384, 407, 301, 388, 416, 313, 399, 424, 319, 409, 432, 328, 416, 437, 338, 423, 446, 348, 432, 455, 358, 439, 460, 365, 446, 466, 370, 450, 479, 378, 461, 492, 381, 464, 495, 386, 468, 499, 432, 470, 506, 440, 479, 516, 455, 484, 530, 463, 500, 542, 471, 509, 551, 482, 517, 563, 485, 530, 568, 488, 532, 570, 500, 542, 587, 508, 551, 595, 515, 564, 607, 521, 574, 618, 531, 582, 628, 542, 600, 640, 552, 606, 650, 571, 632, 762, 581, 634, 764, 612, 636, 767, 614, 645, 775, 620, 740, 780, 624, 764, 782, 631, 772, 791, 639, 784, 797, 649, 796, 805, 657, 799, 810, 668, 810, 819, 679, 821, 849, 684, 829, 857, 688, 836, 864, 696, 840, 874, 706, 887, 879, 708, 891, 892, 718, 899, 895, 727, 947, 909, 729, 956, 911, 738, 959, 920, 741, 970, 935, 760, 984, 937, 780, 996, 947, 791, 1025, 957, 803, 1036, 972, 812, 1047, 975, 866, 1055, 989, 886, 1071, 1006, 901, 1078, 1017, 919, 1085, 1026, 931, 1103, 1039, 956, 1125, 1052, 966, 1129, 1061, 970, 1133, 1065, 974, 1137, 1070, 982, 1142, 1075, 987, 1147, 1080, 992, 1159, 1088, 997, 1161, 1090, 999, 1163, 1092, 1029, 1206, 1131, 1032, 1245, 1133, 1034, 1247, 1135, 1036, 1249, 1137, 1081, 1251, 1139, 1089, 1274, 1150, 1099, 1284, 1154, 1101, 1330, 1156, 1154, 1332, 1158, 1156, 1373, 1160, 1191, 1434, 1205, 1215, 1455, 1262, 1238, 1469, 1272, 1250, 1480, 1276, 1258, 1487, 1283, 1265, 1498, 1298, 1310, 1547, 1349, 1347, 1590, 1409, 1393, 1599, 1412, 1395, 1609, 1420, 1402, 1624, 1451, 1404, 1626, 1496, 1440, 1635, 1516, 1500, 1671, 1572, 1560, 1686, 1581, 1582, 1699, 1591, 1643, 1743, 1595, 1648, 1746, 1601, 1660, 1760, 1613, 1665, 1771, 1622, 1674, 1783, 0 <repeats 9589 times>}
 ```
 
-Here is all the byte memory after phase one of `POOLtype`:
+Here is all the byte memory after phase one of `POOLtype`.  Hover over an index in the `byte_start` array (last row) to see the string it represents in the `byte_mem` arrays (first three rows).
 
 <div id="whereToAddDivs"></div>
 
-And here it is in a more readable form:
+And here are just the strings (name `i`, for each `i`), in a more readable form.
 
 <div id="whereToAddDivsBetter"></div>
 <script src="tangle-mem.js"></script>

@@ -1,36 +1,7 @@
-// This block copied from https://gist.github.com/hsablonniere/2581101
-if (!Element.prototype.scrollIntoViewIfNeeded) {
-    Element.prototype.scrollIntoViewIfNeeded = function (centerIfNeeded) {
-        centerIfNeeded = arguments.length === 0 ? true : !!centerIfNeeded;
-
-        var parent = this.parentNode,
-        parentComputedStyle = window.getComputedStyle(parent, null),
-        parentBorderTopWidth = parseInt(parentComputedStyle.getPropertyValue('border-top-width')),
-        parentBorderLeftWidth = parseInt(parentComputedStyle.getPropertyValue('border-left-width')),
-        overTop = this.offsetTop - parent.offsetTop < parent.scrollTop,
-        overBottom = (this.offsetTop - parent.offsetTop + this.clientHeight - parentBorderTopWidth) > (parent.scrollTop + parent.clientHeight),
-        overLeft = this.offsetLeft - parent.offsetLeft < parent.scrollLeft,
-        overRight = (this.offsetLeft - parent.offsetLeft + this.clientWidth - parentBorderLeftWidth) > (parent.scrollLeft + parent.clientWidth),
-        alignWithTop = overTop && !overBottom;
-
-        if ((overTop || overBottom) && centerIfNeeded) {
-            parent.scrollTop = this.offsetTop - parent.offsetTop - parent.clientHeight / 2 - parentBorderTopWidth + this.clientHeight / 2;
-        }
-
-        if ((overLeft || overRight) && centerIfNeeded) {
-            parent.scrollLeft = this.offsetLeft - parent.offsetLeft - parent.clientWidth / 2 - parentBorderLeftWidth + this.clientWidth / 2;
-        }
-
-        if ((overTop || overBottom || overLeft || overRight) && !centerIfNeeded) {
-            this.scrollIntoView(alignWithTop);
-        }
-    };
-}
-
-let t = pooltypeMem.t;
-let ts = pooltypeMem.ts;
-let names = pooltypeMem.names;
-let texts = pooltypeMem.texts;
+const t = pooltypeMem.t;
+const ts = pooltypeMem.ts;
+const names = pooltypeMem.names;
+const texts = pooltypeMem.texts;
 
 function token_show_single(c) {
     if (c == 0) return "<#>";
@@ -69,7 +40,7 @@ function token_show(s, n) {
 }
 
 // For a cell (string index / char), output its [index, value, show, id]
-function pretty_cell(id_prefix, s, n) {
+function pretty_token_cell(id_prefix, s, n) {
     let ret = {};
     let [show, len] = token_show(s, n);
     ret["show"] = show;
@@ -82,7 +53,7 @@ function pretty_cell(id_prefix, s, n) {
 function pretty_array(id_prefix, s) {
     let ret = [];
     for (let i = 0; i < s.length;) {
-        let [cell, len] = pretty_cell(id_prefix, s, i);
+        let [cell, len] = pretty_token_cell(id_prefix, s, i);
         ret.push(cell);
         i += len;
     }
@@ -202,7 +173,7 @@ function addDivsEvenBetter(elt) {
             let valueStr = escapeForHtml('' + token.value);
             if (token.type == 'Name@' || token.type == 'Module@') {
                 cellType.innerHTML += valueStr;
-                cellValue.innerHTML = names[token.value].join('');
+                cellValue.innerHTML = names[token.value];
             } else {
                 if (token.type == 'Module#') valueStr = '{' + valueStr + '}';
                 cellValue.innerHTML = valueStr;

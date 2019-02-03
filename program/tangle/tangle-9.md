@@ -28,6 +28,10 @@ Here is a visualization of some of all of this, for the memory at the end of pha
 
         name(string)    name_number    equiv(text:n or num:n)    text_number    text_link    text(tokens)
 
+<div id="pooltypeMem"></div>
+<script src="tangle-mem.js"></script>
+<script src="pretty-9.js"></script>
+
 So in principle to output the entire program, this is what we'd need to do:
 
 - Locate the replacement text for the unnamed module (it starts in `text_link[0]`), and start writing it out.

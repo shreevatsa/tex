@@ -39,7 +39,7 @@ To summarize the tokens from [part 5](tangle-5) and this one: sequences of token
 
 - the module number `n` is represented as two bytes `208 + (n // 256)` and `n % 256`.
 
-For example, after reading 2000 lines of `tex.web`, these are the contents of the `tok_mem` arrays:
+For example, after reading 2000 lines of `tex.web`, these are the contents of the (first 3 of 5) `tok_mem` arrays:
 
     gdb /path/to/tangle
 
@@ -68,11 +68,11 @@ For example, after reading 2000 lines of `tex.web`, these are the contents of th
       730, 1939, 664, 794, 423, 736, 2040, 964, 1038, 525, 801, 2108, 1020, 1116, 715, 862, 2186, 1022, 1370, 776, 878, 2287, 1051, 1381, 784, 901, 2320, 1070, 1467, 794, 911, 2330, 1080,
       1477, 804, 915, 2339, 1089, 1486, 813, 924, 2348, 1119, 1499, 830, 1047, 2411, 1295, 1561, 925, 1129, 0 <repeats 9872 times>}
 
-What this means.
+Here is the data in a more symbolic form. Hover over an index in the `tok_start` array (last row) to see the string it represents in the `tok_mem` arrays (first five rows).
 
 <div id="whereToAddDivs" class="full-width"></div>
 
-And here it is in more readable form:
+And here are just the texts:
 
 <div id="whereToAddDivsBetter" class="full-width"></div>
 
