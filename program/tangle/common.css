@@ -1,0 +1,75 @@
+object {
+    border: 2px solid grey;
+    width: 100%;
+}
+img {
+    max-width: 100%;
+}
+
+/* https://css-tricks.com/full-width-containers-limited-width-parents/ */
+.full-width {
+    width: 96vw;
+    position: relative;
+    left: 48%;
+    right: 48%;
+    margin-left: -48vw;
+    margin-right: -48vw;
+}
+
+.hbox {
+    /* What to do with an overfull hbox: another alternative is "visible", but that can overflow borders and the like. */
+    overflow-x: scroll; 
+    /* Required so that child divs are laid out without wrapping. */
+    white-space: nowrap;
+    /* So that it can be put into other hboxes / vboxes / hlists, without occupying the entire row. */
+    /* Unfortunately, incompatible with overflow-x: scroll. */
+    /* display: inline-block; */
+}
+/*.startArray {}
+.memArray {}*/
+.tokensrow {
+    border: 2px solid grey;
+    white-space: nowrap; /* So that a div containing just a space does not collapse */
+    overflow-x: scroll;
+}
+
+.startCell {
+    border: 2px solid grey;
+    display: inline-block;
+    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+}
+.memCell {
+    border: 2px solid lightgrey;
+    display: inline-block;
+    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+}
+.cellIndex {
+    margin: 1px; padding: 1px;
+    font-size: 50%;
+    text-align: center;
+}
+.cellRaw {
+    margin: 1px; padding: 1px;
+    font-family: monospace;
+    font-size: 50%;
+    text-align: center;
+}
+.cellShow {
+    margin: 1px; padding: 1px;
+    text-align: center;
+}
+.cellType {
+    font-size: 50%;
+    text-align: center;
+}
+.cellValue {
+    text-align: center;
+}
+
+.pointed {
+    background-color: red;
+}
+.pointNext {
+    background-color: grey;
+}
+
