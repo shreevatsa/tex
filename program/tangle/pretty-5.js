@@ -30,6 +30,8 @@ if (!Element.prototype.scrollIntoViewIfNeeded) {
 
 let b = pooltypeMem.b;
 let bs = pooltypeMem.bs;
+let names = pooltypeMem.names;
+let texts = poolTypeMem.texts;
 
 // For a cell (string index / char), output its [index, value, show, id]
 function pretty_cell(id_prefix, s, n) {
@@ -80,7 +82,7 @@ function memCellDiv(cell) {
 }
 function memArrayDiv(array) {
   let d = document.createElement('div');
-  d.classList.add('memArray');
+  d.classList.add('memArray'); d.classList.add('hbox');
   for (let cell of array) { d.appendChild(memCellDiv(cell)); }
   return d;
 }
@@ -109,7 +111,7 @@ function startCellDiv(cell) {
 }
 function startArrayDiv(array) {
   let d = document.createElement('div');
-  d.classList.add('startArray');
+  d.classList.add('startArray'); d.classList.add('hbox');
   for (let cell of array) { d.appendChild(startCellDiv(cell)); }
   return d;
 }
@@ -125,7 +127,6 @@ addDivs(document.getElementById('whereToAddDivs'));
 
 function addDivsBetter(elt) {
   // Directly compute all the strings and write them out.
-  let names = listStrings(b, bs);
   for (let i = 0; i < names.length; ++i) {
     let s = names[i].join('');
     let d = document.createElement('div');

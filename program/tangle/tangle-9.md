@@ -20,9 +20,13 @@ Let's summarize what we have so far:
 
 - We have ways of looking up either modules or identifiers (any of the others) by name.
 
-- We have the numeric equivalents (for numeric macros and double-quoted strings) and text equivalents (for simple macros, parametric macros, modules) (and the latter of these we can follow "to be continued", using `text_link`.
+- We have the numeric equivalents (for numeric macros and double-quoted strings) and text equivalents (for simple macros, parametric macros, modules) (and the latter of these we can follow "to be continued" links for, using `text_link`).
 
 - Given a name (or when looking at the replacement text for a macro / module), we can say what type it is.
+
+Here is a visualization of some of all of this, for the memory at the end of phase one of reading POOLTYPE.web.
+
+        name(string)    name_number    equiv(text:n or num:n)    text_number    text_link    text(tokens)
 
 So in principle to output the entire program, this is what we'd need to do:
 

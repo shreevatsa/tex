@@ -2,70 +2,7 @@
 title: Tangle -- Tokens
 ---
 
-<style>
-object {
-    border: 2px solid grey;
-    width: 100%;
-}
-img {
-    max-width: 100%;
-}
-
-/* https://css-tricks.com/full-width-containers-limited-width-parents/ */
-.full-width {
-  width: 96vw;
-  position: relative;
-  left: 48%;
-  right: 48%;
-  margin-left: -48vw;
-  margin-right: -48vw;
-}
-
-.startArray {
-    overflow-x: scroll;
-    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
-}
-.memArray {
-    overflow-x: scroll;
-    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
-}
-.startCell {
-    border: 2px solid grey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
-}
-.memCell {
-    border: 2px solid grey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
-}
-.cellIndex {
-    margin: 1px; padding: 1px;
-    font-size: 50%;
-    text-align: center;
-}
-.cellRaw {
-    margin: 1px; padding: 1px;
-    font-family: monospace;
-    font-size: 50%;
-    text-align: center;
-}
-.cellShow {
-    margin: 1px; padding: 1px;
-    text-align: center;
-}
-.pointed {
-    background-color: red;
-}
-.pointNext {
-    background-color: grey;
-}
-.tokensrow {
-    border: 2px solid grey;
-    display: block;
-    white-space: nowrap; /* So that a div containing just a space does not collapse */
-}
-</style>
+<link rel="stylesheet" href="common.css">
 
 (This is sections 70 to 76; see below, after 76, for comments.)
 
@@ -139,9 +76,13 @@ And here it is in more readable form:
 
 <div id="whereToAddDivsBetter" class="full-width"></div>
 
+To make it even more readable, we can pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved.
+
+<div id="whereToAddDivsEvenBetter" class="full-width"></div>
+
+If we recall that the name `0` refers to the unnamed module, we can now finally put together the “name” and “text” arrays, along with the pointers between them, namely: `equiv` points from names to (sometimes) text equivalents, and `text_link` points from one text to another (its sequel). This will make sense of most the data structures introduced in [Part 5](tangle-5) (section 38), except we don't need to care about the `link` and `ilk` arrays anymore because they are either an internal implementation detail for finding the number from the name, or contain only trivial information.
+
+Let's look at all this at the top of the next part.
+
 <script src="tangle-mem.js"></script>
 <script src="pretty-8.js"></script>
-
-To make it even more readable, we'd have to pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved.
-
-[TODO: next steps here for me: unify my hacky pretty-5.js and pretty-8.js (or at least put them in the same file); instead of directly writing out the divs, try to make well-defined transformations on the data to another format.]

@@ -2,56 +2,7 @@
 title: Tangle -- Data structures
 ---
 
-<style>
-object {
-    border: 2px solid grey;
-    width: 100%;
-}
-img {
-    max-width: 100%;
-}
-
-.startArray {
-    overflow: scroll;
-    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
-}
-.memArray {
-    overflow: scroll;
-    white-space: nowrap; /* Not sure why, but this is required so that its child divs are laid out without wrapping. */
-}
-.startCell {
-    border: 2px solid grey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
-}
-.memCell {
-    border: 2px solid lightgrey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
-}
-.cellIndex {
-    margin: 1px; padding: 1px;
-    font-size: 50%;
-    text-align: center;
-}
-.cellRaw {
-    margin: 1px; padding: 1px;
-    font-family: monospace;
-    font-size: 50%;
-    text-align: center;
-}
-.cellShow {
-    margin: 1px; padding: 1px;
-    text-align: center;
-}
-.pointed {
-    background-color: red;
-}
-.pointNext {
-    background-color: grey;
-}
-</style>
-
+<link rel="stylesheet" href="common.css">
 
 If you were trying to read the program, this is probably where you got overwhelmed.
 
@@ -139,53 +90,25 @@ Above in `byte_mem` we stored the names of modules, the names of macros, double-
 
 So let's keep track of the total info we need to keep for each name:
 
-- For module names:
+| Type of name                    | Text equivalent | Numeric equivalent | Tree “left” link | Tree “right” link | Hash table “next” link | Secondary hash table “next” link | Type code |
+| :------------------------------ | :-------------: | :----------------: | :--------------: | :---------------: | :--------------------: | :------------------------------: | :-------: |
+| Module name                     |        ✓        |                    |        ✓         |         ✓         |                        |                                  |           |
+| (Double-quoted) String          |                 |         ✓          |                  |                   |           ✓            |                                  |     1     |
+| Numeric macro name              |                 |         ✓          |                  |                   |           ✓            |                                  |     1     |
+| Simple (text) macro name        |        ✓        |                    |                  |                   |           ✓            |                                  |     2     |
+| Parametric macro name           |        ✓        |                    |                  |                   |           ✓            |                                  |     3     |
+| Pascal keywords and identifiers |                 |                    |                  |                   |           ✓            |                ✓                 |     0     |
 
-    - text equivalents (stored in `equiv` array)
+As we can see, we need to store three things for every type name. DEK's idea is that we can store them in just three arrays, as follows:
 
-    - tree "left" links (stored in `link` array under name `llink`)
-
-    - tree "right" links (stored in `ilk` array under name `rlink`)
-
-- For strings:
-
-    - numeric equivalents (stored in `equiv` array)
-
-    - hash table "next" links (stored in `link` array)
-
-    - type code, i.e. the integer 1 (stored in `ilk` array)
-
-- For numeric macro names:
-
-    - numeric equivalents (stored in `equiv` array)
-
-    - hash table "next" links (stored in `link` array)
-
-    - type code, i.e. the integer 1 (stored in `ilk` array)
-
-- For simple (text) macro names:
-
-    - text equivalents (stored in `equiv` array)
-
-    - hash table "next" links (stored in `link` array)
-
-    - type code, i.e. the integer 2 (stored in `ilk` array)
-
-- For parametric macro names:
-
-    - text equivalents (stored in `equiv` array)
-
-    - hash table "next" links (stored in `link` array)
-
-    - type code, i.e. the integer 3 (stored in `ilk` array)
-
-- For Pascal identifiers:
-
-    - hash table "next" links (stored in `link` array)
-
-    - secondary hash table "next" links (stored in `equiv` array!)
-
-    - type code, i.e. the integer 0 (stored in `ilk` array)
+| Type of name                    | Text equivalent | Numeric equivalent |   Tree “left” link   |  Tree “right” link  | Hash table “next” link | Secondary hash table “next” link | Type code |
+| :------------------------------ | :-------------: | :----------------: | :------------------: | :-----------------: | :--------------------: | :------------------------------: | :-------: |
+| Module name                     |     `equiv`     |                    | `link` (aka `llink`) | `ilk` (aka `rlink`) |                        |                                  |           |
+| (Double-quoted) String          |                 |      `equiv`       |                      |                     |         `link`         |                                  |   `ilk`   |
+| Numeric macro name              |                 |      `equiv`       |                      |                     |         `link`         |                                  |   `ilk`   |
+| Simple (text) macro name        |     `equiv`     |                    |                      |                     |         `link`         |                                  |   `ilk`   |
+| Parametric macro name           |     `equiv`     |                    |                      |                     |         `link`         |                                  |   `ilk`   |
+| Pascal keywords and identifiers |                 |                    |                      |                     |         `link`         |             `equiv`              |   `ilk`   |
 
 As we can see, DEK only needs three arrays `equiv`, `link` and `ilk` (the last of these could be 2 bits in most cases but is unconditionally 16 bits) to store all the additional info for each name.
 
