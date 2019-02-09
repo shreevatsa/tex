@@ -55,9 +55,6 @@ And here are just the strings (name `i`, for each `i`), in a more readable form.
 <script src="tangle-mem.js"></script>
 <script src="pretty-5.js"></script>
 
-
-We also need to store “tokens”, but we'll discuss those later in Part 8 (though DEK mentions them in this section).
-
 ## Getting to the names and vice-versa
 
 With the above `byte_mem` arrays, these names are stored in memory, and with the `byte_start` array, we can get from "name `i`" to the actual name.
@@ -65,6 +62,8 @@ With the above `byte_mem` arrays, these names are stored in memory, and with the
 We also need a way of getting from the actual name (sequence of characters) to its number, i.e. a way to look up names in the above arrays. This is explained in the next two sections. Of the different kinds of names mentioned so far, a binary search tree is used for module names (as they need to be recognized given a prefix), and a hash table is used for everything else.
 
 ## What we need to store: Pascal texts (replacements / equivalents)
+
+We also need to store “tokens”, but we'll discuss those later in Part 8. For now a brief discussion, as DEK mentions them in this section.
 
 Above in `byte_mem` we stored the names of modules, the names of macros, double-quoted strings, and Pascal identifiers. For all the kinds of identifiers other than Pascal identifiers, we also need to store **equivalents**:
 

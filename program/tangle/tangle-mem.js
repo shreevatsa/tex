@@ -21,30 +21,31 @@ function listNames(byte_mem, byte_start) {
         var w = i % ww;
         ret.push(byte_mem[w].slice(byte_start[i], byte_start[i + ww]));
     }
+    for (var i = 0; i < ret.length; ++i) {
+        var h = 0;
+        for (var j = 0; j < ret[i].length; ++j) {
+            h = (h * 2 + ret[i].byteAt(j)) % 353;
+        }
+        // console.log(ret[i], '\t -> \t', h);
+    }
     return ret;
 }
-// For a cell (string index / char), output its [index, value, show, id]
-function pretty_cell(id_prefix, s, n) {
-    var c = s.byteAt(n);
-    if (c < 32 || c >= 127)
-        throw "Decide what to do with unprintable characters like: " + c;
-    return {
-        index: n,
-        rawValue: two_hex(s.byteAt(n)),
-        show: s[n],
-        id: id_prefix + "_" + n
-    };
-}
-function pretty_array(id_prefix, s) {
-    var ret = Array.prototype.map.call(s, function (c, i) { return pretty_cell(id_prefix, s, i); });
-    ret.push({ index: s.length, value: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length });
-    return ret;
-}
-// What we want:
-// One div for each array -- a div for each cell, each with an id.
-// One div for the "start" array -- a div for each cell, with onclick / onhover events.
-// Returns a HTML node.
-function memArrayDiv(array) {
+// Representation of a single array of |byte_mem|, as a row of "cells".
+function byteArrayDiv(id_prefix, s) {
+    var array = [];
+    for (var i = 0; i < s.length; ++i) {
+        var c = s.byteAt(i);
+        if (c < 32 || c >= 127)
+            throw "Decide what to do with unprintable characters like: " + c;
+        array.push({
+            index: i,
+            rawValue: two_hex(s.byteAt(i)),
+            show: s[i],
+            id: id_prefix + "_" + i
+        });
+    }
+    array.push({ index: s.length, rawValue: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length });
+    // Now that we have the [index, rawValue, show, id] for every element, create the row of cells.
     var d = document.createElement('div');
     d.classList.add('memArray');
     d.classList.add('hbox');
@@ -54,24 +55,81 @@ function memArrayDiv(array) {
         dd.classList.add('memCell');
         dd.id = cell.id;
         dd.innerHTML = ("<div class=\"cellIndex\">" + cell.index + "</div>" +
-            ("<div class=\"cellShow\">" + cell.show + "</div>") +
+            ("<div class=\"cellShow\">" + escapeForHtml(cell.show) + "</div>") +
             ("<div class=\"cellRaw\">" + (cell.rawValue != undefined ? cell.rawValue : ' ') + "</div>"));
         d.appendChild(dd);
     }
     return d;
 }
-// For each cell in the start array, output its [index, array_num, start_index, id, start_id]
-function pretty_start(start, m) {
-    var ret = [];
-    for (var i = 0; i < start.length; ++i) {
-        var w = i % m;
-        var tmp = [i, w, start[i], "b" + w + "_" + start[i], "b" + w + "_" + start[i + m]];
-        ret.push(tmp);
+// Returns a HTML node.
+function memArrayDiv(id_prefix, s) {
+    var array = [];
+    for (var i = 0; i < s.length;) {
+        var _a = token_show(s, i), show = _a[0], len = _a[1];
+        array.push({
+            index: "" + i + (len == 2 ? "," + (i + 1) : ""),
+            rawValue: two_hex(s.byteAt(i)) + (len == 2 ? " " + two_hex(s.byteAt(i + 1)) : ""),
+            show: show,
+            id: id_prefix + "_" + i
+        });
+        i += len;
     }
-    return ret;
+    array.push({ index: s.length, rawValue: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length });
+    var d = document.createElement('div');
+    d.classList.add('memArray');
+    d.classList.add('hbox');
+    for (var _i = 0, array_2 = array; _i < array_2.length; _i++) {
+        var cell = array_2[_i];
+        var dd = document.createElement('div');
+        dd.classList.add('memCell');
+        dd.id = cell.id;
+        dd.innerHTML = ("<div class=\"cellIndex\">" + cell.index + "</div>" +
+            ("<div class=\"cellShow\">" + escapeForHtml(cell.show) + "</div>") +
+            ("<div class=\"cellRaw\">" + cell.rawValue + "</div>"));
+        d.appendChild(dd);
+    }
+    return d;
 }
-// Token memory
-// ============
+function point(pointed, next) {
+    var p = document.getElementById(pointed);
+    var n = document.getElementById(next);
+    if (n)
+        n.scrollIntoViewIfNeeded();
+    if (p)
+        p.scrollIntoViewIfNeeded();
+    if (p)
+        p.classList.add('pointed');
+    if (n)
+        n.classList.add('pointNext');
+}
+function unpoint(pointed, next) {
+    var p = document.getElementById(pointed);
+    var n = document.getElementById(next);
+    if (p)
+        p.classList.remove('pointed');
+    if (n)
+        n.classList.remove('pointNext');
+}
+function startArrayDiv(start, ww, idPrefix) {
+    var d = document.createElement('div');
+    d.classList.add('startArray');
+    d.classList.add('hbox');
+    var _loop_1 = function (i) {
+        var w = i % ww; // Read as z = i % zz, for token start array.
+        // The IDs of the corresponding (pointed-to) cells in the memory arrays.
+        var _a = [idPrefix + w + "_" + start[i], idPrefix + w + "_" + start[i + ww]], pointed = _a[0], next = _a[1];
+        var dd = document.createElement('div');
+        dd.classList.add('startCell');
+        dd.innerHTML = "<div class=\"cellIndex\">" + i + "</div><div class=\"cellShow\">" + start[i] + "</div><div class=\"cellRaw\">" + w + "</div>";
+        dd.addEventListener('mouseover', function () { point(pointed, next); });
+        dd.addEventListener('mouseout', function () { unpoint(pointed, next); });
+        d.appendChild(dd);
+    };
+    for (var i = 0; i < start.length; ++i) {
+        _loop_1(i);
+    }
+    return d;
+}
 // Given arrays |t| (itself containing |zz|=5 byte arrays) and |ts| (containing integer indices into the arrays in |t|),
 // transform into a single map from index to list of (one-byte and two-byte) tokens.
 // NOTE: This does not do any "understanding" of the tokens, just puts each one out as a list of 1 or 2 bytes (integers).
@@ -159,6 +217,25 @@ function parseToken(t) {
     var s = String.fromCharCode(c);
     return { type: 'char', value: s };
 }
+// A short human-readable representation of the token, to show inside a small div.
+function token_show(s, n) {
+    var a = s.byteAt(n);
+    var tokenBytes = (a >= 128) ? [s.byteAt(n), s.byteAt(n + 1)] : [s.byteAt(n)];
+    var token = parseToken(tokenBytes);
+    if (token.type == 'Name@')
+        return ["<N@" + token.value + ">", 2];
+    if (token.type == 'Module@')
+        return ["Mod@" + token.value, 2];
+    if (token.type == 'Module#')
+        return ["Mod#" + token.value, 2];
+    if (token.type == 'param' || token.type == 'begin_comment' || token.type == 'end_comment') {
+        return ["<" + token.value + ">", 1];
+    }
+    if (token.type == 'char' || token.type == 'left_arrow' || token.type == 'not_equal' || token.type == 'double_dot')
+        return ["" + token.value, 1];
+    return ["<" + token.type + ">", 1];
+}
+//=========================================================================================================================================================================
 // Some parts of the internal memory of TANGLE, just after the reading phase (phase one) of processing pooltype.web
 var pooltypeMem = {
     b: [
@@ -179,7 +256,7 @@ var pooltypeMem = {
     text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0]
 };
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
-console.log('The first name is: ', pooltypeMem['names'][1]);
+// console.log('The first name is: ', pooltypeMem['names'][1]);
 pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts).map(function (text) { return text.map(function (token) { return parseToken(token); }); });
 // Not even related to TANGLE
 // ==========================

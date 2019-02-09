@@ -2,12 +2,15 @@
 * @fileoverview Utilities for parsing and displaying the internal memory of TANGLE.
 */
 
+interface HTMLElement {
+    scrollIntoViewIfNeeded(): void;
+ }
 interface String {
     byteAt(n : number) : Byte;
  }
  type Byte = 0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|126|127|128|129|130|131|132|133|134|135|136|137|138|139|140|141|142|143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|158|159|160|161|162|163|164|165|166|167|168|169|170|171|172|173|174|175|176|177|178|179|180|181|182|183|184|185|186|187|188|189|190|191|192|193|194|195|196|197|198|199|200|201|202|203|204|205|206|207|208|209|210|211|212|213|214|215|216|217|218|219|220|221|222|223|224|225|226|227|228|229|230|231|232|233|234|235|236|237|238|239|240|241|242|243|244|245|246|247|248|249|250|251|252|253|254|255;
 
-String.prototype.byteAt = function(n: number): Byte { 
+String.prototype.byteAt = function(n: number): Byte {
     return this.charCodeAt(n);
 }
 
@@ -28,6 +31,13 @@ function listNames(byte_mem: Array<string>, byte_start: Array<number>): Array<st
         let w = i % ww;
         ret.push(byte_mem[w].slice(byte_start[i], byte_start[i + ww]));
     }
+    for (let i = 0; i < ret.length; ++i) {
+        let h = 0;
+        for (let j = 0; j < ret[i].length; ++j) {
+            h = (h * 2 + ret[i].byteAt(j)) % 353;
+        }
+        // console.log(ret[i], '\t -> \t', h);
+    }
     return ret;
 }
 
@@ -37,60 +47,102 @@ interface byteCell {
     show: string;     // The actual character to display
     id: string;       // An id for the element in the HTML DOM
 }
-// For a cell (string index / char), output its [index, value, show, id]
-function pretty_cell(id_prefix: string, s: string, n: number): byteCell {
-    let c = s.byteAt(n);
-    if (c < 32 || c >= 127) throw "Decide what to do with unprintable characters like: " + c;
-    return {
-        index: n, 
-        rawValue: two_hex(s.byteAt(n)),
-        show: s[n],
-        id: id_prefix + "_" + n,
-    }
-}
 type byteCells = Array<byteCell>;
-function pretty_array(id_prefix: string, s: string): byteCells {
-    let ret = Array.prototype.map.call(s, (c, i) => pretty_cell(id_prefix, s, i));
-    ret.push({index: s.length, value: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length});
-    return ret;
-}
-// What we want:
-// One div for each array -- a div for each cell, each with an id.
-// One div for the "start" array -- a div for each cell, with onclick / onhover events.
-
-// Returns a HTML node.
-function memArrayDiv(array) {
+// Representation of a single array of |byte_mem|, as a row of "cells".
+function byteArrayDiv(id_prefix: string, s: string) {
+    let array: byteCells = [];
+    for (let i = 0; i < s.length; ++i) {
+        let c = s.byteAt(i);
+        if (c < 32 || c >= 127) throw "Decide what to do with unprintable characters like: " + c;
+        array.push({
+                index: i,
+                rawValue: two_hex(s.byteAt(i)),
+                show: s[i],
+                id: id_prefix + "_" + i,
+            });
+        }
+    array.push({index: s.length, rawValue: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length});
+    // Now that we have the [index, rawValue, show, id] for every element, create the row of cells.
     let d = document.createElement('div');
     d.classList.add('memArray'); d.classList.add('hbox');
     for (let cell of array) {
         let dd = document.createElement('div'); dd.classList.add('memCell'); dd.id = cell.id;
         dd.innerHTML = (
             `<div class="cellIndex">${cell.index}</div>` +
-            `<div class="cellShow">${cell.show}</div>` + 
+            `<div class="cellShow">${escapeForHtml(cell.show)}</div>` +
             `<div class="cellRaw">${cell.rawValue != undefined ? cell.rawValue : ' '}</div>`
         );
-        d.appendChild(dd); 
+        d.appendChild(dd);
     }
     return d;
-  }
-
-type TokenBytes = Array<Byte>;
-type TokenBytesText = Array<TokenBytes>;
-type Index = number;
-
-// For each cell in the start array, output its [index, array_num, start_index, id, start_id]
-function pretty_start(start, m) {
-    let ret = [];
-    for (let i = 0; i < start.length; ++i) {
-        let w = i % m;
-        let tmp = [i, w, start[i], "b" + w + "_" + start[i], "b" + w + "_" + start[i+m]];
-        ret.push(tmp);
-    }
-    return ret;
 }
+
+// Returns a HTML node.
+function memArrayDiv(id_prefix: string, s: string) {
+    let array: byteCells = [];
+    for (let i = 0; i < s.length;) {
+        let [show, len]: [string, number] = token_show(s, i);
+        array.push({
+            index: `${i}` + (len == 2 ? `,${i+1}`: ``),
+            rawValue: two_hex(s.byteAt(i)) + (len == 2 ? ` ${two_hex(s.byteAt(i+1))}` : ``),
+            show: show,
+            id: id_prefix + "_" + i,
+        });
+        i += len;
+    }
+    array.push({index: s.length, rawValue: 'NO', show: 'NOPE', id: id_prefix + "_" + s.length});
+    let d = document.createElement('div');
+    d.classList.add('memArray'); d.classList.add('hbox');
+    for (let cell of array) {
+        let dd = document.createElement('div'); dd.classList.add('memCell'); dd.id = cell.id;
+        dd.innerHTML = (
+            `<div class="cellIndex">${cell.index}</div>` +
+            `<div class="cellShow">${escapeForHtml(cell.show)}</div>` +
+            `<div class="cellRaw">${cell.rawValue}</div>`
+        );
+        d.appendChild(dd);
+    }
+    return d;
+}
+
+function point(pointed: string, next: string) {
+    let p = document.getElementById(pointed);
+    let n = document.getElementById(next);
+    if (n) n.scrollIntoViewIfNeeded();
+    if (p) p.scrollIntoViewIfNeeded();
+    if (p) p.classList.add('pointed');
+    if (n) n.classList.add('pointNext');
+}
+function unpoint(pointed: string, next: string) {
+    let p = document.getElementById(pointed);
+    let n = document.getElementById(next);
+    if (p) p.classList.remove('pointed');
+    if (n) n.classList.remove('pointNext');
+}
+function startArrayDiv(start: Array<number>, ww: number, idPrefix: string) {
+    let d = document.createElement('div');
+    d.classList.add('startArray'); d.classList.add('hbox');
+    for (let i = 0; i < start.length; ++i) {
+        let w: number = i % ww;  // Read as z = i % zz, for token start array.
+        // The IDs of the corresponding (pointed-to) cells in the memory arrays.
+        let [pointed, next] = [idPrefix + w + "_" + start[i], idPrefix + w + "_" + start[i+ww]];
+        let dd = document.createElement('div');
+        dd.classList.add('startCell');
+        dd.innerHTML = `<div class="cellIndex">${i}</div><div class="cellShow">${start[i]}</div><div class="cellRaw">${w}</div>`;
+        dd.addEventListener('mouseover', () => { point(pointed, next); });
+        dd.addEventListener('mouseout', () => { unpoint(pointed, next) });
+        d.appendChild(dd);
+    }
+    return d;
+}
+
+//=========================================================================================================================================================================
 
 // Token memory
 // ============
+type TokenBytes = Array<Byte>;
+type TokenBytesText = Array<TokenBytes>;
+type Index = number;
 // Given arrays |t| (itself containing |zz|=5 byte arrays) and |ts| (containing integer indices into the arrays in |t|),
 // transform into a single map from index to list of (one-byte and two-byte) tokens.
 // NOTE: This does not do any "understanding" of the tokens, just puts each one out as a list of 1 or 2 bytes (integers).
@@ -168,6 +220,28 @@ function parseToken(t: TokenBytes): Token {
     return {type: 'char', value: s};
 }
 
+// A short human-readable representation of the token, to show inside a small div.
+function token_show(s: string, n: number): [string, number] {
+    let a: Byte = s.byteAt(n);
+    let tokenBytes: TokenBytes = (a >= 128) ? [s.byteAt(n), s.byteAt(n + 1)] : [s.byteAt(n)];
+    let token: Token = parseToken(tokenBytes);
+    if (token.type == 'Name@') return [`<N@${token.value}>`, 2];
+    if (token.type == 'Module@') return [`Mod@${token.value}`, 2];
+    if (token.type == 'Module#') return [`Mod#${token.value}`, 2];
+    if (token.type == 'param' || token.type == 'begin_comment' || token.type == 'end_comment') {
+        return [`<${token.value}>`, 1];
+    }
+    if (token.type == 'char' || token.type == 'left_arrow' || token.type == 'not_equal' || token.type == 'double_dot') return [`${token.value}`, 1];
+    return [`<${token.type}>`, 1];
+}
+
+
+
+
+
+//=========================================================================================================================================================================
+
+
 // Some parts of the internal memory of TANGLE, just after the reading phase (phase one) of processing pooltype.web
 let pooltypeMem = {
     b: [
@@ -176,7 +250,7 @@ let pooltypeMem = {
         "POOLtypelabelvarinitializeSet initial values of key variablesdecrtext_charlast_text_chararraynull_codeforchrwrite_lnRead the other strings from the \\.{POOL} file, or give an error message and abortthen\"a\"^\"\"\"\"~xsumfalseRead one string, but abort if there are problemsreadtrue",
     ],
     bs: [0, 0, 0, 0, 7, 8, 9, 13, 13, 13, 37, 16, 39, 46, 26, 73, 51, 61, 76, 55, 65, 86, 65, 74, 90, 80, 88, 97, 84, 93, 99, 88, 102, 114, 100, 105, 116, 102, 108, 121, 107, 116, 125, 133, 197, 131, 135, 201, 133, 139, 203, 138, 170, 205, 141, 173, 208, 143, 175, 210, 149, 179, 214, 156, 184, 219, 159, 190, 267, 164, 193, 271, 166, 197, 275, 173],
-    
+
     t: [
         "\xd0\x05\x80\x13=0 255;\xd0\x0a\x80 i\x180\x80!\x0c37\x80\"\x80\x1c[i]\x18' ';\x80 i\x18\x0c177\x80!\x0c377\x80\"\x80\x1c[i]\x18' ';\x80\x0d\x80&(\x00);\x80'9999;\x80\x0f\xd0\x12\x80\x03:\x809\x80:\x80\x1b\x80\x14;\x80;:\x80<;",
         "\xd0\x02\x80\x01\x80\x02(\x80\x03,\x80\x04);\x80\x059999;\x80\x06\xa8\x07\x80\x08\xa8\x09\x80\x0a\x80\x0b;\x80\x08\xa8\x0c\x80\x0d\xa8\x0e\x80\x0f;\x80\x15\xd0\x0b\x80 i\x18\x80\x16\x80!\x80\x17\x80\"\x80\x19[\x80#(i)]\x18\x80\x1f;\x80 i\x18\x0c200\x80!\x0c377\x80\"\x80\x19[\x80\x1c[i]]\x18i;\x80 i\x180\x80!\x0c176\x80\"\x80\x19[\x80\x1c[i]]\x18i;\xd0\x0f\x80\x0d\x80\x0b;\xa8(;s\x18256;\xa8);\x80&('(',\x80$:1,' characters in all.)');9999:\x80\x0f.\xd0\x13\x80=(\x80\x03);\x80;\x18\x80>;\x80+\x80?(\x80\x03)\x80,\x80%('! I can''t read the POOL file.');\x80@\xa8A;\x80B\x80;;\x80+\x80C\x80?(\x80\x03)\x80,\x80%('! There''s junk after the check sum')",
@@ -185,14 +259,14 @@ let pooltypeMem = {
         "\xd0\x08\x80\x1c[\x0c40]\x18' ';\x80\x1c[\x0c41]\x18'!';\x80\x1c[\x0c42]\x18'\"';\x80\x1c[\x0c43]\x18'#';\x80\x1c[\x0c44]\x18'$';\x80\x1c[\x0c45]\x18'%';\x80\x1c[\x0c46]\x18'&';\x80\x1c[\x0c47]\x18'''';\x80\x1c[\x0c50]\x18'(';\x80\x1c[\x0c51]\x18')';\x80\x1c[\x0c52]\x18'*';\x80\x1c[\x0c53]\x18'+';\x80\x1c[\x0c54]\x18',';\x80\x1c[\x0c55]\x18'-';\x80\x1c[\x0c56]\x18'.';\x80\x1c[\x0c57]\x18'/';\x80\x1c[\x0c60]\x18'0';\x80\x1c[\x0c61]\x18'1';\x80\x1c[\x0c62]\x18'2';\x80\x1c[\x0c63]\x18'3';\x80\x1c[\x0c64]\x18'4';\x80\x1c[\x0c65]\x18'5';\x80\x1c[\x0c66]\x18'6';\x80\x1c[\x0c67]\x18'7';\x80\x1c[\x0c70]\x18'8';\x80\x1c[\x0c71]\x18'9';\x80\x1c[\x0c72]\x18':';\x80\x1c[\x0c73]\x18';';\x80\x1c[\x0c74]\x18'<';\x80\x1c[\x0c75]\x18'=';\x80\x1c[\x0c76]\x18'>';\x80\x1c[\x0c77]\x18'?';\x80\x1c[\x0c100]\x18'@';\x80\x1c[\x0c101]\x18'A';\x80\x1c[\x0c102]\x18'B';\x80\x1c[\x0c103]\x18'C';\x80\x1c[\x0c104]\x18'D';\x80\x1c[\x0c105]\x18'E';\x80\x1c[\x0c106]\x18'F';\x80\x1c[\x0c107]\x18'G';\x80\x1c[\x0c110]\x18'H';\x80\x1c[\x0c111]\x18'I';\x80\x1c[\x0c112]\x18'J';\x80\x1c[\x0c113]\x18'K';\x80\x1c[\x0c114]\x18'L';\x80\x1c[\x0c115]\x18'M';\x80\x1c[\x0c116]\x18'N';\x80\x1c[\x0c117]\x18'O';\x80\x1c[\x0c120]\x18'P';\x80\x1c[\x0c121]\x18'Q';\x80\x1c[\x0c122]\x18'R';\x80\x1c[\x0c123]\x18'S';\x80\x1c[\x0c124]\x18'T';\x80\x1c[\x0c125]\x18'U';\x80\x1c[\x0c126]\x18'V';\x80\x1c[\x0c127]\x18'W';\x80\x1c[\x0c130]\x18'X';\x80\x1c[\x0c131]\x18'Y';\x80\x1c[\x0c132]\x18'Z';\x80\x1c[\x0c133]\x18'[';\x80\x1c[\x0c134]\x18'\\';\x80\x1c[\x0c135]\x18']';\x80\x1c[\x0c136]\x18'^';\x80\x1c[\x0c137]\x18'_';\x80\x1c[\x0c140]\x18'`';\x80\x1c[\x0c141]\x18'a';\x80\x1c[\x0c142]\x18'b';\x80\x1c[\x0c143]\x18'c';\x80\x1c[\x0c144]\x18'd';\x80\x1c[\x0c145]\x18'e';\x80\x1c[\x0c146]\x18'f';\x80\x1c[\x0c147]\x18'g';\x80\x1c[\x0c150]\x18'h';\x80\x1c[\x0c151]\x18'i';\x80\x1c[\x0c152]\x18'j';\x80\x1c[\x0c153]\x18'k';\x80\x1c[\x0c154]\x18'l';\x80\x1c[\x0c155]\x18'm';\x80\x1c[\x0c156]\x18'n';\x80\x1c[\x0c157]\x18'o';\x80\x1c[\x0c160]\x18'p';\x80\x1c[\x0c161]\x18'q';\x80\x1c[\x0c162]\x18'r';\x80\x1c[\x0c163]\x18's';\x80\x1c[\x0c164]\x18't';\x80\x1c[\x0c165]\x18'u';\x80\x1c[\x0c166]\x18'v';\x80\x1c[\x0c167]\x18'w';\x80\x1c[\x0c170]\x18'x';\x80\x1c[\x0c171]\x18'y';\x80\x1c[\x0c172]\x18'z';\x80\x1c[\x0c173]\x18'{';\x80\x1c[\x0c174]\x18'|';\x80\x1c[\x0c175]\x18'}';\x80\x1c[\x0c176]\x18'~';\xd0\x0e\x80$\x180;\xd0\x11(k<\x806)\x807(k>\x808)",
     ],
     ts: [0, 0, 0, 0, 0, 0, 45, 5, 5, 0, 11, 47, 12, 35, 1206, 61, 127, 36, 43, 1213, 78, 190, 65, 250, 1229, 98, 315, 435],
-    
+
     equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15,         0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0,         1073741881, 0],
-    
+
     text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0],
-    
+
 };
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
-console.log('The first name is: ', pooltypeMem['names'][1]);
+// console.log('The first name is: ', pooltypeMem['names'][1]);
 pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts).map(text => text.map(token => parseToken(token)));
 
 // Not even related to TANGLE
@@ -218,7 +292,7 @@ function two_hex(n: Byte) { if (n < 0 || n >= 256) throw "Not a byte: " + n; ret
 if (!('scrollIntoViewIfNeeded' in Element.prototype)) {
     Element.prototype['scrollIntoViewIfNeeded'] = function (centerIfNeeded) {
         centerIfNeeded = arguments.length === 0 ? true : !!centerIfNeeded;
-        
+
         var parent = this.parentNode,
         parentComputedStyle = window.getComputedStyle(parent, null),
         parentBorderTopWidth = parseInt(parentComputedStyle.getPropertyValue('border-top-width')),
@@ -228,15 +302,15 @@ if (!('scrollIntoViewIfNeeded' in Element.prototype)) {
         overLeft = this.offsetLeft - parent.offsetLeft < parent.scrollLeft,
         overRight = (this.offsetLeft - parent.offsetLeft + this.clientWidth - parentBorderLeftWidth) > (parent.scrollLeft + parent.clientWidth),
         alignWithTop = overTop && !overBottom;
-        
+
         if ((overTop || overBottom) && centerIfNeeded) {
             parent.scrollTop = this.offsetTop - parent.offsetTop - parent.clientHeight / 2 - parentBorderTopWidth + this.clientHeight / 2;
         }
-        
+
         if ((overLeft || overRight) && centerIfNeeded) {
             parent.scrollLeft = this.offsetLeft - parent.offsetLeft - parent.clientWidth / 2 - parentBorderLeftWidth + this.clientWidth / 2;
         }
-        
+
         if ((overTop || overBottom || overLeft || overRight) && !centerIfNeeded) {
             this.scrollIntoView(alignWithTop);
         }
