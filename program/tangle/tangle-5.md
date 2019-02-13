@@ -47,11 +47,11 @@ $20 = {0, 0, 0, 0, 6, 5, 19, 13, 8, 24, 38, 13, 52, 62, 16, 68, 71, 26, 102, 76,
 
 Here is all the byte memory after phase one of `POOLtype`.  Hover over an index in the `byte_start` array (last row) to see the string it represents in the `byte_mem` arrays (first three rows).
 
-<div id="whereToAddDivs"></div>
+<div id="byteMemArrays" class="areaofsanity full-width"></div>
 
 And here are just the strings (name `i`, for each `i`), in a more readable form.
 
-<div id="whereToAddDivsBetter"></div>
+<div id="byteMemListNames" class="areaofsanity"></div>
 <script src="tangle-mem.js"></script>
 <script src="pretty-5.js"></script>
 

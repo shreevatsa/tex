@@ -28,7 +28,20 @@ Here is a visualization of some of all of this, for the memory at the end of pha
 
         name(string)    name_number    equiv(text:n or num:n)    text_number    text_link    text(tokens)
 
-<div id="pooltypeMem"></div>
+<link rel="stylesheet" href="common.css">
+
+<div class="full-width">
+<div class="areaofsanity">
+    <div id="listNamesAndTexts" class="hbox">
+        <div id="namesAndEquivsDiv" class="hbox">
+            <div id="namesDiv" class="vbox"></div>
+            <div id="equivsDiv" class="vbox"></div>
+        </div>
+        <div id="textsDiv" class="vbox"></div>
+    </div>
+</div>
+</div>
+
 <script src="tangle-mem.js"></script>
 <script src="pretty-9.js"></script>
 
@@ -76,12 +89,16 @@ This is our state, `(n, m, r, b, e)`.
 
 <object type="image/svg+xml" data="tangle-081.svg"></object>
 
+Here, “above” = “after” (i.e. greater indices in the array). And the way we don't need a separate stack for the parameters is the following: When we encounter a macro (i.e. a macro call), we scan its parameter (argument) immediately (which occurs immediately after the macro call) and add it as a new text, with a new (dummy) name pointing to it. So, next, when actually expanding the definition of the macro, the last name always points to the parameter (argument) to the macro.
+
 
 <object type="image/svg+xml" data="tangle-082.svg"></object>
 
 
 <object type="image/svg+xml" data="tangle-083.svg"></object>
 
+
+Read the following `push_level(p)` as: “start reading name *p*”.
 
 <object type="image/svg+xml" data="tangle-084.svg"></object>
 
@@ -94,21 +111,42 @@ This is our state, `(n, m, r, b, e)`.
 
 <object type="image/svg+xml" data="tangle-087.svg"></object>
 
+The cases are:
+
+ * base case / terminal case: if we've reached the end (of everything), return 0.
+
+ * if we've reached the end of *current* text, `pop_level` (and return `{:module_number}` if necessary).
+
+ * Most common case: read the next token, (if it's a macro act on it), and return it.
+
 
 <object type="image/svg+xml" data="tangle-088.svg"></object>
+
+Hmm, what about the a = 0? We'd return token 0. Can it even happen? I need to think about this.
 
 
 <object type="image/svg+xml" data="tangle-089.svg"></object>
 
+Read “put a parameter on the parameter stack” as “look for an argument, scan it, append it to the texts array”.
+
 
 <object type="image/svg+xml" data="tangle-090.svg"></object>
+
+Here “character” = “token”. The “copy the parameter into `tok_mem`” means: (1) add a new text, (2) add a new name that points to it.
+
+Note that in case of `debug`, we add a nonempty name (namely `#`) (which is correspondingly undone by `pop_level`), else the new name is an empty one, just pointing to the parameter.
 
 
 <object type="image/svg+xml" data="tangle-091.svg"></object>
 
 
+The following is a really clever idea!
+
 <object type="image/svg+xml" data="tangle-092.svg"></object>
+
+— i.e., to start writing out the parameter, treat it as an expansion of the last name. (Note: this is not the macro expansion! This is just a dummy-string → argument “expansion”.)
 
 
 <object type="image/svg+xml" data="tangle-093.svg"></object>
 
+Why `name_ptr + '77777` (assumes 16-bit 2s complement) instead of `name_ptr - 1`? Need to think about this.

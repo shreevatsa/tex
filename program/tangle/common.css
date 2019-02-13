@@ -16,54 +16,61 @@ img {
     margin-right: -48vw;
 }
 
+.areaofsanity, .areaofsanity div {
+    display: inline-flex;
+}
+
+.vbox {
+    flex-direction: column;
+}
+
 .hbox {
+    /* redundant, use for clarity if you like */
+    flex-direction: row;
     /* What to do with an overfull hbox: another alternative is "visible", but that can overflow borders and the like. */
     overflow-x: scroll; 
-    /* Required so that child divs are laid out without wrapping. */
-    white-space: nowrap;
-    /* So that it can be put into other hboxes / vboxes / hlists, without occupying the entire row. */
-    /* Unfortunately, incompatible with overflow-x: scroll. */
-    /* display: inline-block; */
 }
-/*.startArray {}
-.memArray {}*/
+
+#namesDiv, #equivsDiv {
+    white-space: nowrap;
+}
+
 .tokensrow {
     border: 2px solid grey;
-    white-space: nowrap; /* So that a div containing just a space does not collapse */
     overflow-x: scroll;
+    max-width: 90%;
 }
 
 .startCell {
     border: 2px solid grey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+    flex-direction: column;
 }
 .memCell {
     border: 2px solid lightgrey;
-    display: inline-block;
-    white-space: pre-wrap; /* So that a div containing just a space does not collapse */
+    flex-direction: column;
 }
 .cellIndex {
     margin: 1px; padding: 1px;
     font-size: 50%;
-    text-align: center;
+    justify-content: center;
 }
 .cellRaw {
     margin: 1px; padding: 1px;
     font-family: monospace;
     font-size: 50%;
-    text-align: center;
+    justify-content: center;
 }
 .cellShow {
     margin: 1px; padding: 1px;
-    text-align: center;
+    justify-content: center;
 }
 .cellType {
     font-size: 50%;
-    text-align: center;
+    justify-content: center;
 }
 .cellValue {
-    text-align: center;
+    justify-content: center;
+    white-space: nowrap;
 }
 
 .pointed {

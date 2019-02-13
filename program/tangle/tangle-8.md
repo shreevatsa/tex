@@ -70,15 +70,15 @@ For example, after reading 2000 lines of `tex.web`, these are the contents of th
 
 Here is the data in a more symbolic form. Hover over an index in the `tok_start` array (last row) to see the string it represents in the `tok_mem` arrays (first five rows).
 
-<div id="whereToAddDivs" class="full-width"></div>
+<div id="tokMemArrays" class="areaofsanity full-width"></div>
 
-And here are just the texts:
+And here are just the texts (text `i` for each `i`), without the complications of splitting into five arrays, and keeping track of `start` indices:
 
-<div id="whereToAddDivsBetter" class="full-width"></div>
+<div id="tokMemListTexts" class="areaofsanity full-width"></div>
 
 To make it even more readable, we can pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved.
 
-<div id="whereToAddDivsEvenBetter" class="full-width"></div>
+<div id="tokMemListTextsResolved" class="areaofsanity full-width"></div>
 
 If we recall that the name `0` refers to the unnamed module, we can now finally put together the “name” and “text” arrays, along with the pointers between them, namely: `equiv` points from names to (sometimes) text equivalents, and `text_link` points from one text to another (its sequel). This will make sense of most the data structures introduced in [Part 5](tangle-5) (section 38), except we don't need to care about the `link` and `ilk` arrays anymore because they are either an internal implementation detail for finding the number from the name, or contain only trivial information.
 

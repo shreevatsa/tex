@@ -49,7 +49,7 @@ interface byteCell {
 }
 type byteCells = Array<byteCell>;
 // Representation of a single array of |byte_mem|, as a row of "cells".
-function byteArrayDiv(id_prefix: string, s: string) {
+function byteArrayDiv(id_prefix: string, s: string): HTMLElement {
     let array: byteCells = [];
     for (let i = 0; i < s.length; ++i) {
         let c = s.byteAt(i);
@@ -69,7 +69,7 @@ function byteArrayDiv(id_prefix: string, s: string) {
         let dd = document.createElement('div'); dd.classList.add('memCell'); dd.id = cell.id;
         dd.innerHTML = (
             `<div class="cellIndex">${cell.index}</div>` +
-            `<div class="cellShow">${escapeForHtml(cell.show)}</div>` +
+            `<div class="cellShow">${preserveSpace(escapeForHtml(cell.show))}</div>` +
             `<div class="cellRaw">${cell.rawValue != undefined ? cell.rawValue : ' '}</div>`
         );
         d.appendChild(dd);
@@ -77,8 +77,7 @@ function byteArrayDiv(id_prefix: string, s: string) {
     return d;
 }
 
-// Returns a HTML node.
-function memArrayDiv(id_prefix: string, s: string) {
+function memArrayDiv(id_prefix: string, s: string): HTMLElement {
     let array: byteCells = [];
     for (let i = 0; i < s.length;) {
         let [show, len]: [string, number] = token_show(s, i);
@@ -235,6 +234,89 @@ function token_show(s: string, n: number): [string, number] {
     return [`<${token.type}>`, 1];
 }
 
+function byteMemListNames(elt: HTMLElement) {
+    elt.classList.add('vbox');
+    const names = pooltypeMem["names"];
+    for (let i = 0; i < names.length; ++i) {
+        let d = document.createElement('div');
+        d.innerHTML = `${i}: <code>${escapeForHtml(names[i])}</code>`;
+        elt.appendChild(d);
+    }
+}
+
+function listEquivs(elt: HTMLElement) {
+    elt.classList.add('vbox');
+    const equiv = pooltypeMem.equiv;
+    const ilk = pooltypeMem.ilk;
+    const names = pooltypeMem["names"];
+    console.log(`names: ${names.length}, ilk: ${ilk.length}, equiv: ${equiv.length}`);
+    const n = names.length;
+    for (let i = 0; i < n; ++i) {
+        let e = document.createElement('div');
+        let value: string;
+        if (ilk[i] == 0 || ilk[i] >= 4) value = '-';
+        else if (ilk[i] == 1) value = `=${equiv[i] - (1 << 30)}`;
+        else if (ilk[i] == 2 || ilk[i] == 3) value = `->${equiv[i]}`;
+        else throw "Not possible";
+        e.innerHTML = `${i}: ${value}`;
+        elt.appendChild(e);
+    }
+}
+
+function tokMemListTexts(elt: HTMLElement) {
+    elt.classList.add('vbox');
+    const zz = pooltypeMem.t.length;
+    if (pooltypeMem.ts.length != texts.length + zz) throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
+    for (let i = 1; i < texts.length; ++i) {
+        let text = texts[i];
+        let cells = document.createElement('div'); cells.classList.add('hbox');
+        for (let j = 0; j < text.length; ++j) {
+            let token = text[j];
+            let cell = document.createElement('div'); cell.classList.add('memCell');
+            cell.innerHTML = (
+                `<div class="cellType">${escapeForHtml(token.type)}</div>` +
+                `<div class="cellValue">${escapeForHtml('' + token.value)}</div>`
+            );
+            cells.appendChild(cell);
+        }
+        let d = document.createElement('div');
+        d.classList.add('tokensrow'); d.classList.add('hbox');
+        d.innerHTML = " " + i + ": " + cells.innerHTML;
+        elt.appendChild(d);
+    }
+}
+
+function tokMemListTextsResolved(elt: HTMLElement) {
+    elt.classList.add('vbox');
+    const zz = pooltypeMem.t.length;
+    if (pooltypeMem.ts.length != texts.length + zz) throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
+    for (let i = 1; i < texts.length; ++i) {
+        let text = texts[i];
+        let cells = document.createElement('div'); cells.classList.add('hbox');
+        for (let j = 0; j < text.length; ++j) {
+            let token = text[j];
+            let cell = document.createElement('div'); cell.classList.add('memCell');
+            let cellType = document.createElement('div'); cellType.classList.add('cellType');
+            let cellValue = document.createElement('div'); cellValue.classList.add('cellValue');
+            cellType.innerHTML = escapeForHtml(token.type);
+            let valueStr = escapeForHtml('' + token.value);
+            if (token.type == 'Name@' || token.type == 'Module@') {
+                cellType.innerHTML += valueStr;
+                cellValue.innerHTML = names[token.value];
+            } else {
+                if (token.type == 'Module#') valueStr = '{' + valueStr + '}';
+                cellValue.innerHTML = valueStr;
+            }
+            cell.appendChild(cellType);
+            cell.appendChild(cellValue);
+            cells.appendChild(cell);
+        }
+        let d = document.createElement('div'); d.classList.add('hbox');
+        d.classList.add('tokensrow'); d.classList.add('hbox');
+        d.innerHTML = " " + i + ": " + cells.innerHTML;
+        elt.appendChild(d);
+    }
+}
 
 
 
@@ -260,7 +342,8 @@ let pooltypeMem = {
     ],
     ts: [0, 0, 0, 0, 0, 0, 45, 5, 5, 0, 11, 47, 12, 35, 1206, 61, 127, 36, 43, 1213, 78, 190, 65, 250, 1229, 98, 315, 435],
 
-    equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15,         0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0,         1073741881, 0],
+    equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15,         0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0,         1073741881, 0, 0, 0],
+    ilk: [7, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 14, 0, 0, 0, 3, 3, 2, 0, 2, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 3, 0, 0, 41, 0, 3, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
 
     text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0],
 
@@ -283,6 +366,10 @@ function escapeForHtml(text) {
         "/": '&#x2F',  // forward slash is included as it helps end an HTML entity
     };
     return text.replace(/[&<>"'/]/g, m => map[m]);
+}
+
+function preserveSpace(text: string) {
+    return text.replace(' ', '&nbsp;');
 }
 
 function one_hex(n: number) { if (n < 0 || n >= 16) throw "Not a hex digit: " + n; return n.toString(16); }

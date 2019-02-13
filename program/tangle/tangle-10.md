@@ -18,6 +18,18 @@ img {
 
 <object type="image/svg+xml" data="tangle-094.svg"></object>
 
+Cases to think about:
+
+| Input                | Output                  |        Comments        |
+| :------------------- | :---------------------- | :--------------------: |
+| E - 15 + 17          | E + 2                   |    add the numbers     |
+| E - 15 + 17 * y      | itself: E - 15 + 17 * y |                        |
+| 1E - 15 + 17         | itself: 1E - 15 + 17    |                        |
+| -15 + 17.5           | itself: -15 + 17.5      | only integer constants |
+| x * y (where y = -2) | x * (-2)                |                        |
+| x - y (where y = -2) | x + 2                   |                        |
+| x - 0.1              | itself: x - 0.1         |   need to remember -   |
+
 
 <object type="image/svg+xml" data="tangle-095.svg"></object>
 

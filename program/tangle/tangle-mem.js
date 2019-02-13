@@ -55,13 +55,12 @@ function byteArrayDiv(id_prefix, s) {
         dd.classList.add('memCell');
         dd.id = cell.id;
         dd.innerHTML = ("<div class=\"cellIndex\">" + cell.index + "</div>" +
-            ("<div class=\"cellShow\">" + escapeForHtml(cell.show) + "</div>") +
+            ("<div class=\"cellShow\">" + preserveSpace(escapeForHtml(cell.show)) + "</div>") +
             ("<div class=\"cellRaw\">" + (cell.rawValue != undefined ? cell.rawValue : ' ') + "</div>"));
         d.appendChild(dd);
     }
     return d;
 }
-// Returns a HTML node.
 function memArrayDiv(id_prefix, s) {
     var array = [];
     for (var i = 0; i < s.length;) {
@@ -235,6 +234,101 @@ function token_show(s, n) {
         return ["" + token.value, 1];
     return ["<" + token.type + ">", 1];
 }
+function byteMemListNames(elt) {
+    elt.classList.add('vbox');
+    var names = pooltypeMem["names"];
+    for (var i = 0; i < names.length; ++i) {
+        var d = document.createElement('div');
+        d.innerHTML = i + ": <code>" + escapeForHtml(names[i]) + "</code>";
+        elt.appendChild(d);
+    }
+}
+function listEquivs(elt) {
+    elt.classList.add('vbox');
+    var equiv = pooltypeMem.equiv;
+    var ilk = pooltypeMem.ilk;
+    var names = pooltypeMem["names"];
+    console.log("names: " + names.length + ", ilk: " + ilk.length + ", equiv: " + equiv.length);
+    var n = names.length;
+    for (var i = 0; i < n; ++i) {
+        var e = document.createElement('div');
+        var value = void 0;
+        if (ilk[i] == 0 || ilk[i] >= 4)
+            value = '-';
+        else if (ilk[i] == 1)
+            value = "=" + (equiv[i] - (1 << 30));
+        else if (ilk[i] == 2 || ilk[i] == 3)
+            value = "->" + equiv[i];
+        else
+            throw "Not possible";
+        e.innerHTML = i + ": " + value;
+        elt.appendChild(e);
+    }
+}
+function tokMemListTexts(elt) {
+    elt.classList.add('vbox');
+    var zz = pooltypeMem.t.length;
+    if (pooltypeMem.ts.length != texts.length + zz)
+        throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
+    for (var i = 1; i < texts.length; ++i) {
+        var text = texts[i];
+        var cells = document.createElement('div');
+        cells.classList.add('hbox');
+        for (var j = 0; j < text.length; ++j) {
+            var token = text[j];
+            var cell = document.createElement('div');
+            cell.classList.add('memCell');
+            cell.innerHTML = ("<div class=\"cellType\">" + escapeForHtml(token.type) + "</div>" +
+                ("<div class=\"cellValue\">" + escapeForHtml('' + token.value) + "</div>"));
+            cells.appendChild(cell);
+        }
+        var d = document.createElement('div');
+        d.classList.add('tokensrow');
+        d.classList.add('hbox');
+        d.innerHTML = " " + i + ": " + cells.innerHTML;
+        elt.appendChild(d);
+    }
+}
+function tokMemListTextsResolved(elt) {
+    elt.classList.add('vbox');
+    var zz = pooltypeMem.t.length;
+    if (pooltypeMem.ts.length != texts.length + zz)
+        throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
+    for (var i = 1; i < texts.length; ++i) {
+        var text = texts[i];
+        var cells = document.createElement('div');
+        cells.classList.add('hbox');
+        for (var j = 0; j < text.length; ++j) {
+            var token = text[j];
+            var cell = document.createElement('div');
+            cell.classList.add('memCell');
+            var cellType = document.createElement('div');
+            cellType.classList.add('cellType');
+            var cellValue = document.createElement('div');
+            cellValue.classList.add('cellValue');
+            cellType.innerHTML = escapeForHtml(token.type);
+            var valueStr = escapeForHtml('' + token.value);
+            if (token.type == 'Name@' || token.type == 'Module@') {
+                cellType.innerHTML += valueStr;
+                cellValue.innerHTML = names[token.value];
+            }
+            else {
+                if (token.type == 'Module#')
+                    valueStr = '{' + valueStr + '}';
+                cellValue.innerHTML = valueStr;
+            }
+            cell.appendChild(cellType);
+            cell.appendChild(cellValue);
+            cells.appendChild(cell);
+        }
+        var d = document.createElement('div');
+        d.classList.add('hbox');
+        d.classList.add('tokensrow');
+        d.classList.add('hbox');
+        d.innerHTML = " " + i + ": " + cells.innerHTML;
+        elt.appendChild(d);
+    }
+}
 //=========================================================================================================================================================================
 // Some parts of the internal memory of TANGLE, just after the reading phase (phase one) of processing pooltype.web
 var pooltypeMem = {
@@ -252,7 +346,8 @@ var pooltypeMem = {
         "\xd0\x08\x80\x1c[\x0c40]\x18' ';\x80\x1c[\x0c41]\x18'!';\x80\x1c[\x0c42]\x18'\"';\x80\x1c[\x0c43]\x18'#';\x80\x1c[\x0c44]\x18'$';\x80\x1c[\x0c45]\x18'%';\x80\x1c[\x0c46]\x18'&';\x80\x1c[\x0c47]\x18'''';\x80\x1c[\x0c50]\x18'(';\x80\x1c[\x0c51]\x18')';\x80\x1c[\x0c52]\x18'*';\x80\x1c[\x0c53]\x18'+';\x80\x1c[\x0c54]\x18',';\x80\x1c[\x0c55]\x18'-';\x80\x1c[\x0c56]\x18'.';\x80\x1c[\x0c57]\x18'/';\x80\x1c[\x0c60]\x18'0';\x80\x1c[\x0c61]\x18'1';\x80\x1c[\x0c62]\x18'2';\x80\x1c[\x0c63]\x18'3';\x80\x1c[\x0c64]\x18'4';\x80\x1c[\x0c65]\x18'5';\x80\x1c[\x0c66]\x18'6';\x80\x1c[\x0c67]\x18'7';\x80\x1c[\x0c70]\x18'8';\x80\x1c[\x0c71]\x18'9';\x80\x1c[\x0c72]\x18':';\x80\x1c[\x0c73]\x18';';\x80\x1c[\x0c74]\x18'<';\x80\x1c[\x0c75]\x18'=';\x80\x1c[\x0c76]\x18'>';\x80\x1c[\x0c77]\x18'?';\x80\x1c[\x0c100]\x18'@';\x80\x1c[\x0c101]\x18'A';\x80\x1c[\x0c102]\x18'B';\x80\x1c[\x0c103]\x18'C';\x80\x1c[\x0c104]\x18'D';\x80\x1c[\x0c105]\x18'E';\x80\x1c[\x0c106]\x18'F';\x80\x1c[\x0c107]\x18'G';\x80\x1c[\x0c110]\x18'H';\x80\x1c[\x0c111]\x18'I';\x80\x1c[\x0c112]\x18'J';\x80\x1c[\x0c113]\x18'K';\x80\x1c[\x0c114]\x18'L';\x80\x1c[\x0c115]\x18'M';\x80\x1c[\x0c116]\x18'N';\x80\x1c[\x0c117]\x18'O';\x80\x1c[\x0c120]\x18'P';\x80\x1c[\x0c121]\x18'Q';\x80\x1c[\x0c122]\x18'R';\x80\x1c[\x0c123]\x18'S';\x80\x1c[\x0c124]\x18'T';\x80\x1c[\x0c125]\x18'U';\x80\x1c[\x0c126]\x18'V';\x80\x1c[\x0c127]\x18'W';\x80\x1c[\x0c130]\x18'X';\x80\x1c[\x0c131]\x18'Y';\x80\x1c[\x0c132]\x18'Z';\x80\x1c[\x0c133]\x18'[';\x80\x1c[\x0c134]\x18'\\';\x80\x1c[\x0c135]\x18']';\x80\x1c[\x0c136]\x18'^';\x80\x1c[\x0c137]\x18'_';\x80\x1c[\x0c140]\x18'`';\x80\x1c[\x0c141]\x18'a';\x80\x1c[\x0c142]\x18'b';\x80\x1c[\x0c143]\x18'c';\x80\x1c[\x0c144]\x18'd';\x80\x1c[\x0c145]\x18'e';\x80\x1c[\x0c146]\x18'f';\x80\x1c[\x0c147]\x18'g';\x80\x1c[\x0c150]\x18'h';\x80\x1c[\x0c151]\x18'i';\x80\x1c[\x0c152]\x18'j';\x80\x1c[\x0c153]\x18'k';\x80\x1c[\x0c154]\x18'l';\x80\x1c[\x0c155]\x18'm';\x80\x1c[\x0c156]\x18'n';\x80\x1c[\x0c157]\x18'o';\x80\x1c[\x0c160]\x18'p';\x80\x1c[\x0c161]\x18'q';\x80\x1c[\x0c162]\x18'r';\x80\x1c[\x0c163]\x18's';\x80\x1c[\x0c164]\x18't';\x80\x1c[\x0c165]\x18'u';\x80\x1c[\x0c166]\x18'v';\x80\x1c[\x0c167]\x18'w';\x80\x1c[\x0c170]\x18'x';\x80\x1c[\x0c171]\x18'y';\x80\x1c[\x0c172]\x18'z';\x80\x1c[\x0c173]\x18'{';\x80\x1c[\x0c174]\x18'|';\x80\x1c[\x0c175]\x18'}';\x80\x1c[\x0c176]\x18'~';\xd0\x0e\x80$\x180;\xd0\x11(k<\x806)\x807(k>\x808)",
     ],
     ts: [0, 0, 0, 0, 0, 0, 45, 5, 5, 0, 11, 47, 12, 35, 1206, 61, 127, 36, 43, 1213, 78, 190, 65, 250, 1229, 98, 315, 435],
-    equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15, 0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0, 1073741881, 0],
+    equiv: [0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15, 0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0, 1073741881, 0, 0, 0],
+    ilk: [7, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 14, 0, 0, 0, 3, 3, 2, 0, 2, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 3, 0, 0, 41, 0, 3, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
     text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0]
 };
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
@@ -271,6 +366,9 @@ function escapeForHtml(text) {
         "/": '&#x2F'
     };
     return text.replace(/[&<>"'/]/g, function (m) { return map[m]; });
+}
+function preserveSpace(text) {
+    return text.replace(' ', '&nbsp;');
 }
 function one_hex(n) { if (n < 0 || n >= 16)
     throw "Not a hex digit: " + n; return n.toString(16); }
