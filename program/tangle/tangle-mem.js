@@ -158,7 +158,7 @@ function listTexts(t, ts) {
         }
         ret.push(s);
     }
-    return ret;
+    return ret.map(function (text) { return text.map(function (token) { return parseToken(token); }); });
 }
 ;
 // Given a token t which is a list of either 1 or 2 bytes, say what it is.
@@ -265,6 +265,36 @@ function listEquivs(elt) {
         elt.appendChild(e);
     }
 }
+// Copies code from byteMemListNames and listEquivs
+// TODO: We need some way of knowing which
+function namesAndEquivs(elt) {
+    elt.classList.add('vbox');
+    var names = pooltypeMem["names"];
+    var equiv = pooltypeMem.equiv;
+    var ilk = pooltypeMem.ilk;
+    console.log("names: " + names.length + ", ilk: " + ilk.length + ", equiv: " + equiv.length);
+    var n = names.length;
+    var table = document.createElement('table');
+    var th = document.createElement('tr');
+    th.innerHTML = '<th>i</th><th>Name</th><th>Equiv</th>';
+    table.appendChild(th);
+    for (var i = 0; i < n; ++i) {
+        var value = void 0;
+        // TODO: Detect modules here and find their equivs too
+        if (ilk[i] == 0 || ilk[i] >= 4)
+            value = '-';
+        else if (ilk[i] == 1)
+            value = "=" + (equiv[i] - (1 << 30));
+        else if (ilk[i] == 2 || ilk[i] == 3)
+            value = "->" + equiv[i];
+        else
+            throw "Not possible";
+        var tr = document.createElement('tr');
+        tr.innerHTML = "<td>" + i + "</td><td><code>" + escapeForHtml(names[i]) + "</code></td><td>" + value + "</td>";
+        table.appendChild(tr);
+    }
+    elt.appendChild(table);
+}
 function tokMemListTexts(elt) {
     elt.classList.add('vbox');
     var zz = pooltypeMem.t.length;
@@ -352,7 +382,7 @@ var pooltypeMem = {
 };
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
 // console.log('The first name is: ', pooltypeMem['names'][1]);
-pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts).map(function (text) { return text.map(function (token) { return parseToken(token); }); });
+pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts);
 // Not even related to TANGLE
 // ==========================
 // Given text, escape for HTML. OWASP Rule#1: https://www.owasp.org/index.php?title=XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet&oldid=244079#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content

@@ -145,7 +145,7 @@ type Index = number;
 // Given arrays |t| (itself containing |zz|=5 byte arrays) and |ts| (containing integer indices into the arrays in |t|),
 // transform into a single map from index to list of (one-byte and two-byte) tokens.
 // NOTE: This does not do any "understanding" of the tokens, just puts each one out as a list of 1 or 2 bytes (integers).
-function listTexts(t: Array<string>, ts: Array<number>): Array<TokenBytesText> {
+function listTexts(t: Array<string>, ts: Array<number>): Array<Array<Token>> {
     // This implementation creates new memory holding the tokens. If it turns out
     // to be expensive for some reason, can change this to something that returns
     // a function that given i, returns text i.
@@ -169,7 +169,7 @@ function listTexts(t: Array<string>, ts: Array<number>): Array<TokenBytesText> {
         }
         ret.push(s);
     }
-    return ret;
+    return ret.map(text => text.map(token => parseToken(token)));
 }
 
 interface Token {
@@ -263,6 +263,33 @@ function listEquivs(elt: HTMLElement) {
     }
 }
 
+// Copies code from byteMemListNames and listEquivs
+// TODO: We need some way of knowing which
+function namesAndEquivs(elt: HTMLElement) {
+    elt.classList.add('vbox');
+    const names = pooltypeMem["names"];
+    const equiv = pooltypeMem.equiv;
+    const ilk = pooltypeMem.ilk;
+    console.log(`names: ${names.length}, ilk: ${ilk.length}, equiv: ${equiv.length}`);
+    const n = names.length;
+    let table = document.createElement('table');
+    let th = document.createElement('tr');
+    th.innerHTML = '<th>i</th><th>Name</th><th>Equiv</th>';
+    table.appendChild(th);
+    for (let i = 0; i < n; ++i) {
+        let value: string;
+        // TODO: Detect modules here and find their equivs too
+        if (ilk[i] == 0 || ilk[i] >= 4) value = '-';
+        else if (ilk[i] == 1) value = `=${equiv[i] - (1 << 30)}`;
+        else if (ilk[i] == 2 || ilk[i] == 3) value = `->${equiv[i]}`;
+        else throw "Not possible";
+        let tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i}</td><td><code>${escapeForHtml(names[i])}</code></td><td>${value}</td>`;
+        table.appendChild(tr);
+    }
+    elt.appendChild(table);
+}
+
 function tokMemListTexts(elt: HTMLElement) {
     elt.classList.add('vbox');
     const zz = pooltypeMem.t.length;
@@ -350,7 +377,7 @@ let pooltypeMem = {
 };
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
 // console.log('The first name is: ', pooltypeMem['names'][1]);
-pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts).map(text => text.map(token => parseToken(token)));
+pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts);
 
 // Not even related to TANGLE
 // ==========================

@@ -32,11 +32,15 @@ Here is a visualization of some of all of this, for the memory at the end of pha
 
 <div class="full-width">
 <div class="areaofsanity">
+        <div id="namesAndEquivsDiv"></div>
+</div>
+</div>
+
+Goes here later:
+
+<div class="full-width">
+<div class="areaofsanity">
     <div id="listNamesAndTexts" class="hbox">
-        <div id="namesAndEquivsDiv" class="hbox">
-            <div id="namesDiv" class="vbox"></div>
-            <div id="equivsDiv" class="vbox"></div>
-        </div>
         <div id="textsDiv" class="vbox"></div>
     </div>
 </div>
