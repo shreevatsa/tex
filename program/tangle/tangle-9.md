@@ -37,10 +37,10 @@ Here is a visualization of some of all of this, for the memory at the end of pha
 </style>
 <div class="full-width">
 <div class="areaofsanity">
-    <div id="listNamesAndTexts" class="hbox">
-        <div id="namesAndEquivsDiv"></div>
-        <div id="textsDiv" class="vbox"></div>
-    </div>
+ <div id="listNamesAndTexts" class="hbox">
+  <div id="namesAndEquivsDiv"></div>
+  <div id="textsDiv" class="vbox"></div>
+ </div>
 </div>
 </div>
 <script src="tangle-mem.js"></script>
@@ -89,7 +89,7 @@ This is our state, `(n, m, r, b, e)`.
 
 <object type="image/svg+xml" data="tangle-081.svg"></object>
 
-Here, “above” = “after” (i.e. greater indices in the array). And the way we don't need a separate stack for the parameters is the following: When we encounter a macro (i.e. a macro call), we scan its parameter (argument) immediately (which occurs immediately after the macro call) and add it as a new text, with a new (dummy) name pointing to it. So, next, when actually expanding the definition of the macro, the last name always points to the parameter (argument) to the macro.
+Here, “above” = “after” (i.e. greater indices in the array). And the way we avoid needing a separate stack for keeping track of parameters is this: When we encounter a macro (i.e. a macro call), we scan its parameter (argument) immediately (which occurs immediately after the macro call) and add it as a new text, with a new (dummy) name pointing to it. So, next, when actually expanding the definition of the macro, the last name always points to the parameter (argument) to the macro.
 
 
 <object type="image/svg+xml" data="tangle-082.svg"></object>
