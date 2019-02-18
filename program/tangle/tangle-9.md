@@ -2,15 +2,16 @@
 title: Tangle -- Stacks for output
 ---
 
+<link rel="stylesheet" href="common.css">
+
 <style>
-object {
-    border: 2px solid grey;
-    width: 100%;
-}
-img {
-    max-width: 100%;
-}
 </style>
+
+<object type="image/svg+xml" data="tangle-077.svg"></object>
+
+This struck me as a strange choice when I first encountered it: without saying how these data structures will be populated, we're describing how they'll produce the program? Basically describing Phase 2 before Phase 1? But now it makes sense and seems familiar, as the way DEK writes programs.
+
+----
 
 Let's summarize what we have so far:
 
@@ -26,28 +27,27 @@ Let's summarize what we have so far:
 
 Here is a visualization of some of all of this, for the memory at the end of phase one of reading POOLTYPE.web.
 
-        name(string)    name_number    equiv(text:n or num:n)    text_number    text_link    text(tokens)
-
-<link rel="stylesheet" href="common.css">
-
-<div class="full-width">
-<div class="areaofsanity">
-        <div id="namesAndEquivsDiv"></div>
-</div>
-</div>
-
-Goes here later:
-
+<style>
+#namesAndEquivsDiv {
+    width: 30%;
+}
+#textsDiv {
+    width: 70%;
+}
+</style>
 <div class="full-width">
 <div class="areaofsanity">
     <div id="listNamesAndTexts" class="hbox">
+        <div id="namesAndEquivsDiv"></div>
         <div id="textsDiv" class="vbox"></div>
     </div>
 </div>
 </div>
-
 <script src="tangle-mem.js"></script>
-<script src="pretty-9.js"></script>
+<script>
+namesAndEquivs(document.getElementById('namesAndEquivsDiv'));
+tokMemListTextsResolved(document.getElementById('textsDiv'));
+</script>
 
 So in principle to output the entire program, this is what we'd need to do:
 
@@ -59,12 +59,8 @@ So in principle to output the entire program, this is what we'd need to do:
 
 - When you encounter a simple macro, write out its replacement text.
 
-- When you encounter a parametric macro, identify the parameter (how?) and write out the replacement text: note might have to put the parameter in some variable or on some stack or something.
+- When you encounter a parametric macro, identify the parameter (where it begins and ends) and keep track of it, and write out the replacement text, replacing any encountered `#` with the parameter.
 
-
-<object type="image/svg+xml" data="tangle-077.svg"></object>
-
-This struck me as a strange choice when I first encountered it: without saying how these data structures will be populated, we're describing how they'll produce the program? Basically describing Phase 2 before Phase 1? But now it makes sense and seems familiar, as the way DEK writes programs.
 
 -----
 

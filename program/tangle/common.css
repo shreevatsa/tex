@@ -8,12 +8,23 @@ img {
 
 /* https://css-tricks.com/full-width-containers-limited-width-parents/ */
 .full-width {
-    width: 96vw;
+    width: 98vw;
     position: relative;
-    left: 48%;
-    right: 48%;
-    margin-left: -48vw;
-    margin-right: -48vw;
+    left: 49%;
+    right: 49%;
+    margin-left: -49vw;
+    margin-right: -49vw;
+}
+
+.full-container-width-table {
+    display: table !important;
+    table-layout: fixed;
+    width: 100%; /* then set width individually on the children */
+    white-space: nowrap;
+}
+
+.full-container-width-table td {
+    overflow-x: scroll;
 }
 
 .areaofsanity, .areaofsanity div {
@@ -38,7 +49,7 @@ img {
 .tokensrow {
     border: 2px solid grey;
     overflow-x: scroll;
-    max-width: 90%;
+    max-width: 99%;
 }
 
 .startCell {

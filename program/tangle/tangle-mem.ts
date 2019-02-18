@@ -11,7 +11,7 @@ interface String {
  type Byte = 0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|126|127|128|129|130|131|132|133|134|135|136|137|138|139|140|141|142|143|144|145|146|147|148|149|150|151|152|153|154|155|156|157|158|159|160|161|162|163|164|165|166|167|168|169|170|171|172|173|174|175|176|177|178|179|180|181|182|183|184|185|186|187|188|189|190|191|192|193|194|195|196|197|198|199|200|201|202|203|204|205|206|207|208|209|210|211|212|213|214|215|216|217|218|219|220|221|222|223|224|225|226|227|228|229|230|231|232|233|234|235|236|237|238|239|240|241|242|243|244|245|246|247|248|249|250|251|252|253|254|255;
 
 String.prototype.byteAt = function(n: number): Byte {
-    return this.charCodeAt(n);
+    return this.charCodeAt(n) as Byte;
 }
 
 /**
@@ -36,7 +36,6 @@ function listNames(byte_mem: Array<string>, byte_start: Array<number>): Array<st
         for (let j = 0; j < ret[i].length; ++j) {
             h = (h * 2 + ret[i].byteAt(j)) % 353;
         }
-        // console.log(ret[i], '\t -> \t', h);
     }
     return ret;
 }
@@ -140,36 +139,39 @@ function startArrayDiv(start: Array<number>, ww: number, idPrefix: string) {
 // Token memory
 // ============
 type TokenBytes = Array<Byte>;
-type TokenBytesText = Array<TokenBytes>;
-type Index = number;
+type Index = number; // Just to make it clear that a variable is an index into another array.
 // Given arrays |t| (itself containing |zz|=5 byte arrays) and |ts| (containing integer indices into the arrays in |t|),
 // transform into a single map from index to list of (one-byte and two-byte) tokens.
-// NOTE: This does not do any "understanding" of the tokens, just puts each one out as a list of 1 or 2 bytes (integers).
-function listTexts(t: Array<string>, ts: Array<number>): Array<Array<Token>> {
+function listTexts(t: Array<string>, ts: Array<number>): [Array<Array<Token>>, Set<number>] {
     // This implementation creates new memory holding the tokens. If it turns out
     // to be expensive for some reason, can change this to something that returns
     // a function that given i, returns text i.
     const zz = t.length;
-    let ret: Array<TokenBytesText> = [];
+    let ret: Array<Array<Token>> = [];
+    let modules: Set<number> = new Set();
+    modules.add(0);
     for (let i = 0; i < ts.length; ++i) {
         let z = i % zz;
         // Text i occupies positions ts[i] to ts[i + zz] - 1, in t[z].
         if (i + zz >= ts.length) continue;
-        let s: Array<TokenBytes> = [];
+        let text: Array<Token> = [];
         let j: Index = ts[i];
         while (j < ts[i + zz]) {
+            let token: Token;
             if (t[z].charCodeAt(j) < 128) {
-                s.push([t[z].byteAt(j)]);
+                token = parseToken([t[z].byteAt(j)]);
                 j += 1;
             } else {
-                s.push([t[z].byteAt(j), t[z].byteAt(j+1)]);
+                token = parseToken([t[z].byteAt(j), t[z].byteAt(j+1)])
+                if (token.type == 'Module@') modules.add(token.value as number);
                 j += 2;
             }
+            text.push(token);
             // console.log('Added token', s[s.length - 1]);
         }
-        ret.push(s);
+        ret.push(text);
     }
-    return ret.map(text => text.map(token => parseToken(token)));
+    return [ret, modules];
 }
 
 interface Token {
@@ -244,27 +246,7 @@ function byteMemListNames(elt: HTMLElement) {
     }
 }
 
-function listEquivs(elt: HTMLElement) {
-    elt.classList.add('vbox');
-    const equiv = pooltypeMem.equiv;
-    const ilk = pooltypeMem.ilk;
-    const names = pooltypeMem["names"];
-    console.log(`names: ${names.length}, ilk: ${ilk.length}, equiv: ${equiv.length}`);
-    const n = names.length;
-    for (let i = 0; i < n; ++i) {
-        let e = document.createElement('div');
-        let value: string;
-        if (ilk[i] == 0 || ilk[i] >= 4) value = '-';
-        else if (ilk[i] == 1) value = `=${equiv[i] - (1 << 30)}`;
-        else if (ilk[i] == 2 || ilk[i] == 3) value = `->${equiv[i]}`;
-        else throw "Not possible";
-        e.innerHTML = `${i}: ${value}`;
-        elt.appendChild(e);
-    }
-}
-
-// Copies code from byteMemListNames and listEquivs
-// TODO: We need some way of knowing which
+// Copies code from byteMemListNames
 function namesAndEquivs(elt: HTMLElement) {
     elt.classList.add('vbox');
     const names = pooltypeMem["names"];
@@ -278,11 +260,15 @@ function namesAndEquivs(elt: HTMLElement) {
     table.appendChild(th);
     for (let i = 0; i < n; ++i) {
         let value: string;
-        // TODO: Detect modules here and find their equivs too
-        if (ilk[i] == 0 || ilk[i] >= 4) value = '-';
-        else if (ilk[i] == 1) value = `=${equiv[i] - (1 << 30)}`;
-        else if (ilk[i] == 2 || ilk[i] == 3) value = `->${equiv[i]}`;
-        else throw "Not possible";
+        let modules: Set<number> = pooltypeMem["modules"];
+        if (modules.has(i)) {
+            value = `→${equiv[i]}`;
+        } else {
+            if (ilk[i] == 0) value = '-';
+            else if (ilk[i] == 1) value = `=${equiv[i] - (1 << 30)}`;
+            else if (ilk[i] == 2 || ilk[i] == 3) value = `→${equiv[i]}`;
+            else throw `Impossible ilk: ${ilk[i]} for name ${i}`;
+        }
         let tr = document.createElement('tr');
         tr.innerHTML = `<td>${i}</td><td><code>${escapeForHtml(names[i])}</code></td><td>${value}</td>`;
         table.appendChild(tr);
@@ -291,6 +277,7 @@ function namesAndEquivs(elt: HTMLElement) {
 }
 
 function tokMemListTexts(elt: HTMLElement) {
+    const texts = pooltypeMem.texts;
     elt.classList.add('vbox');
     const zz = pooltypeMem.t.length;
     if (pooltypeMem.ts.length != texts.length + zz) throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
@@ -314,35 +301,42 @@ function tokMemListTexts(elt: HTMLElement) {
 }
 
 function tokMemListTextsResolved(elt: HTMLElement) {
+    const texts = pooltypeMem.texts;
     elt.classList.add('vbox');
     const zz = pooltypeMem.t.length;
-    if (pooltypeMem.ts.length != texts.length + zz) throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
-    for (let i = 1; i < texts.length; ++i) {
+    if (pooltypeMem.ts.length != pooltypeMem.texts.length + zz) throw "Internal error: Unexpected lengths: " + pooltypeMem.ts.length + " " + texts.length + " + " + zz;
+    let table = document.createElement('table'); table.classList.add('full-container-width-table');
+    let th = document.createElement('tr');
+    th.innerHTML = '<th style="width: 2.88rem">i</th><th>Text</th><th style="width: 4.57rem">Next</th>';
+    table.appendChild(th);
+    for (let i = 0; i < texts.length; ++i) {
         let text = texts[i];
         let cells = document.createElement('div'); cells.classList.add('hbox');
         for (let j = 0; j < text.length; ++j) {
             let token = text[j];
-            let cell = document.createElement('div'); cell.classList.add('memCell');
             let cellType = document.createElement('div'); cellType.classList.add('cellType');
             let cellValue = document.createElement('div'); cellValue.classList.add('cellValue');
             cellType.innerHTML = escapeForHtml(token.type);
             let valueStr = escapeForHtml('' + token.value);
             if (token.type == 'Name@' || token.type == 'Module@') {
                 cellType.innerHTML += valueStr;
-                cellValue.innerHTML = names[token.value];
+                cellValue.innerHTML = pooltypeMem.names[token.value as number];
             } else {
                 if (token.type == 'Module#') valueStr = '{' + valueStr + '}';
                 cellValue.innerHTML = valueStr;
             }
+            let cell = document.createElement('div'); cell.classList.add('memCell');
             cell.appendChild(cellType);
             cell.appendChild(cellValue);
             cells.appendChild(cell);
         }
-        let d = document.createElement('div'); d.classList.add('hbox');
-        d.classList.add('tokensrow'); d.classList.add('hbox');
-        d.innerHTML = " " + i + ": " + cells.innerHTML;
-        elt.appendChild(d);
+        let tr = document.createElement('tr'); // tr.style.maxWidth = '80vw'; tr.style.overflowX = 'scroll';
+        let td1 = document.createElement('td'); td1.innerHTML = `${i}`; tr.appendChild(td1);
+        let td2 = document.createElement('td'); td2.appendChild(cells); tr.appendChild(td2); // td2.style.maxWidth = '90vw'; td2.style.overflowX = 'scroll';
+        let td3 = document.createElement('td'); td3.innerHTML = `${pooltypeMem.text_link[i]}`; tr.appendChild(td3);
+        table.appendChild(tr);
     }
+    elt.appendChild(table);
 }
 
 
@@ -352,7 +346,20 @@ function tokMemListTextsResolved(elt: HTMLElement) {
 
 
 // Some parts of the internal memory of TANGLE, just after the reading phase (phase one) of processing pooltype.web
-let pooltypeMem = {
+interface TangleMem {
+    b: Array<string>,
+    bs: Array<number>,
+    t: Array<string>,
+    ts: Array<number>,
+    equiv: Array<number>,
+    ilk: Array<number>,
+    text_link: Array<number>,
+    names: Array<string>,
+    texts: Array<Array<Token>>,
+    modules: Set<number>,
+}
+
+let pooltypeMem: TangleMem = {
     b: [
         "pool_filetypeGlobals in the outer blockLocal variables for initializationenddo_nothingcharintegerofcarriage_returntocountgotolc_hex\"0writediv\" packedbooleaneofuntil\"9read_ln",
         "programoutputTypes in the outer blockprocedurebeginincrASCII_codefirst_text_charxordxchrinvalid_codedoabortMake the first 256 stringsifelseCharacter |k| cannot be printedmodorfileresetrepeatnoteoln",
@@ -374,25 +381,25 @@ let pooltypeMem = {
 
     text_link: [1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0],
 
-};
+} as TangleMem;
 pooltypeMem['names'] = listNames(pooltypeMem.b, pooltypeMem.bs);
 // console.log('The first name is: ', pooltypeMem['names'][1]);
-pooltypeMem['texts'] = listTexts(pooltypeMem.t, pooltypeMem.ts);
+[pooltypeMem['texts'], pooltypeMem['modules']] = listTexts(pooltypeMem.t, pooltypeMem.ts);
 
 // Not even related to TANGLE
 // ==========================
 
 // Given text, escape for HTML. OWASP Rule#1: https://www.owasp.org/index.php?title=XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet&oldid=244079#RULE_.231_-_HTML_Escape_Before_Inserting_Untrusted_Data_into_HTML_Element_Content
-function escapeForHtml(text) {
-    var map = {
+function escapeForHtml(text: string): string {
+    let map: {[key: string]: string} = {
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#x27;',
-        "/": '&#x2F',  // forward slash is included as it helps end an HTML entity
+        "/": '&#x2F',  // forward slash helps end an HTML entity
     };
-    return text.replace(/[&<>"'/]/g, m => map[m]);
+    return text.replace(/[&<>"'/]/g, m => (map[m]));
 }
 
 function preserveSpace(text: string) {
@@ -402,6 +409,7 @@ function preserveSpace(text: string) {
 function one_hex(n: number) { if (n < 0 || n >= 16) throw "Not a hex digit: " + n; return n.toString(16); }
 function two_hex(n: Byte) { if (n < 0 || n >= 256) throw "Not a byte: " + n; return one_hex((n - n % 16) / 16) + one_hex(n % 16); }
 
+/* Need this for non-Chrome browsers. TODO: Uncomment
 // This block copied from https://gist.github.com/hsablonniere/2581101
 if (!('scrollIntoViewIfNeeded' in Element.prototype)) {
     Element.prototype['scrollIntoViewIfNeeded'] = function (centerIfNeeded) {
@@ -430,3 +438,4 @@ if (!('scrollIntoViewIfNeeded' in Element.prototype)) {
         }
     };
 }
+*/

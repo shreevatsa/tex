@@ -103,11 +103,11 @@ As we can see, we need to store three things for every type name. DEK's idea is 
 | Type of name                    | Text equivalent | Numeric equivalent |   Tree “left” link   |  Tree “right” link  | Hash table “next” link | Secondary hash table “next” link | Type code |
 | :------------------------------ | :-------------: | :----------------: | :------------------: | :-----------------: | :--------------------: | :------------------------------: | :-------: |
 | Module name                     |     `equiv`     |                    | `link` (aka `llink`) | `ilk` (aka `rlink`) |                        |                                  |           |
-| (Double-quoted) String          |                 |      `equiv`       |                      |                     |         `link`         |                                  |   `ilk`   |
-| Numeric macro name              |                 |      `equiv`       |                      |                     |         `link`         |                                  |   `ilk`   |
-| Simple (text) macro name        |     `equiv`     |                    |                      |                     |         `link`         |                                  |   `ilk`   |
-| Parametric macro name           |     `equiv`     |                    |                      |                     |         `link`         |                                  |   `ilk`   |
-| Pascal keywords and identifiers |                 |                    |                      |                     |         `link`         |             `equiv`              |   `ilk`   |
+| (Double-quoted) String          |                 |      `equiv`       |                      |                     |         `link`         |                                  |  `ilk`=1  |
+| Numeric macro name              |                 |      `equiv`       |                      |                     |         `link`         |                                  |  `ilk`=1  |
+| Simple (text) macro name        |     `equiv`     |                    |                      |                     |         `link`         |                                  |  `ilk`=2  |
+| Parametric macro name           |     `equiv`     |                    |                      |                     |         `link`         |                                  |  `ilk`=3  |
+| Pascal keywords and identifiers |                 |                    |                      |                     |         `link`         |             `equiv`              |  `ilk`=0  |
 
 As we can see, DEK only needs three arrays `equiv`, `link` and `ilk` (the last of these could be 2 bits in most cases but is unconditionally 16 bits) to store all the additional info for each name.
 
