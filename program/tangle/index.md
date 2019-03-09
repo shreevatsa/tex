@@ -68,6 +68,37 @@ Before we start studying the TANGLE program itself, let's take a few minutes to 
 
 - Also to break lines: output with at most 72 characters per line or whatever.
 
+## Outline of TANGLE
+
+Based on what I've read so far (up to section 11), this is my understnding of how TANGLE works.
+
+Recall that TANGLE needs to turn a WEB source file like (say) `pooltype.web` into a Pascal file `pooltype.p`. It has to do this while expanding macros and module (section) references, and also supporting some additional features like treating strings as numbers. To do this, it operates in two phases: 
+
+1. (Compression) First it reads the `.web` file (and the `.ch` changefile if any) into a compressed representation in memory, one which is aware of e.g. what the strings and modules are.
+
+2. (Expansion) Then it writes out this in-memory representation into the output file.
+
+So the program can be thought of as:
+
+        [read] -> [data structures] -> [write]
+
+And we an try to learn each of the three parts separately (starting with the data structures of course).
+
+The data structures: Mainly (see top of `/program/tangle/tangle-9` on this site),
+
+- **Names** -- these are anything that are **sequences of bytes**. Everything from Pascal keywords like "begin" or "in", to names of variables, procedures, WEB macros, WEB module names, double-quoted strings (to be translated by WEB), etc. Names that are modules are identified separately, and for all other names we keep track of their “ilk” (numeric macro, simple macro, parametric macro, none-of-these), for modules and macros, we keep track of their **equivalents** (the numeric value or “text” that the name should be replaced with, see below.)
+
+- **Texts** -- these are **sequences of tokens**. 
+
+  - A *token*, which occupies 1 or 2 bytes, is either a printable ASCII character, one of several special values like "AND_SIGN" (encoded as non-printable ASCII characters less than 128), or an identifier (the name number), module (the name number) or module number.
+
+  - A *text* therefore is a sequence of the above: the replacement text for a macro or module.
+
+The "write" is further decomposed into:
+
+- Linearizing the tree (or DAG, I guess), into a sequence of tokens. (Done by repeated calls to `get_output`.)
+
+- Producing the textual output, from this sequence of tokens. (Done by `send_the_output` looping to repeatedly call `get_output`, and then branching to call one of `send_val`, `send_sign`, or `send_out`.)
 
 ## Table of contents
 

@@ -4,9 +4,6 @@ title: Tangle -- Stacks for output
 
 <link rel="stylesheet" href="common.css">
 
-<style>
-</style>
-
 <object type="image/svg+xml" data="tangle-077.svg"></object>
 
 This struck me as a strange choice when I first encountered it: without saying how these data structures will be populated, we're describing how they'll produce the program? Basically describing Phase 2 before Phase 1? But now it makes sense and seems familiar, as the way DEK writes programs.
@@ -59,8 +56,9 @@ So in principle to output the entire program, this is what we'd need to do:
 
 - When you encounter a simple macro, write out its replacement text.
 
-- When you encounter a parametric macro, identify the parameter (where it begins and ends) and keep track of it, and write out the replacement text, replacing any encountered `#` with the parameter.
+- When you encounter a parametric macro, identify the parameter (where it begins and ends) and keep track of it, and write out the replacement text, replacing any encountered `#` with the parameter. DEK has a clever idea for doing this: to keep track of the parameter we store (copy) it as a new text, with a dummy name pointing to it. And to replace any `#` we encounter, we expand that dummy name like any other name.
 
+If we view this as a tree with every “expandable” name having its equiv as its child / children, then in effect we want to perform an in-order traversal of this tree. The `get_output` procedure that is the centrepiece of this section amounts to a “next” iterator for this in-order traversal.
 
 -----
 
@@ -103,6 +101,8 @@ Read the following `push_level(p)` as: “start reading name *p*”.
 <object type="image/svg+xml" data="tangle-084.svg"></object>
 
 
+Read this procedure `pop_level(p)` as: “end reading current replacement text”.
+
 <object type="image/svg+xml" data="tangle-085.svg"></object>
 
 
@@ -132,7 +132,7 @@ Read “put a parameter on the parameter stack” as “look for an argument, s
 
 <object type="image/svg+xml" data="tangle-090.svg"></object>
 
-Here “character” = “token”. The “copy the parameter into `tok_mem`” means: (1) add a new text, (2) add a new name that points to it.
+Here, in “the next character must be a ‘`(`’”, read “character” as “token”. The “copy the parameter into `tok_mem`” means: (1) add a new text, (2) add a new name that points to it.
 
 Note that in case of `debug`, we add a nonempty name (namely `#`) (which is correspondingly undone by `pop_level`), else the new name is an empty one, just pointing to the parameter.
 
