@@ -1,8 +1,12 @@
 """
 Script for controlling a gdb process that is running tex, and dumping data about tex's workings.
 
-Guiding principle:
-Generate data, not formatting.
+See `do.sh` for how this is called:
+
+    gdb --eval-command 'source pythonscript.py' --args /home/shreevatsa/build-tex/texlive/full/Master/bin/x86_64-linux/tex expandafter.tex
+    # The `--args` makes the filename (`expandafter.tex`) be passed to the program (`tex`) instead of to gdb.
+
+Guiding principle: Generate data, not formatting.
 - Do nothing related to presenting the information in a useful way on the terminal.
 - Optimize for usable consumption of data by another program.
 - If the interpretation of data can be done by another program, then leave it to that program.
@@ -14,14 +18,15 @@ from __future__ import division
 from __future__ import print_function
 import json
 
+# # Old way, when the commandline only had `gdb --eval-command 'source pythonscript.py'
 # TEX_BINARY = '/home/shreevatsa/build-tex/texlive/full/Master/bin/x86_64-linux/tex'
 # TEX_INPUT = '/home/shreevatsa/debug-tex/expandafter.tex'
 # COMMAND = '%s %s' % (TEX_BINARY, TEX_INPUT)
 # gdb.execute(COMMAND)
 
 out = open('py-gdb-output.txt', 'w')
-out.write('dumped_from_gdb = ')  # A hack!
-to_be_written_out = []
+out.write('dumped_from_gdb = ')  # A hack! Printed before the `json.dump`.
+to_be_written_out = []           # The value whose JSON representation is finally written out.
 
 # Used in showTokenList
 NULL = -268435455  # TeX in §115 defines it as min_halfword which in §110 is defined as 0, but in web2c it's -0xFFFFFFF = -2^28 + 1.
