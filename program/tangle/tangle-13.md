@@ -13,7 +13,7 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The bulk of this part, sections 145 to 155 (the end), is the definition of the `get_next` function which gets the next token of input.
 
 
 <object type="image/svg+xml" data="tangle-143.svg"></object>

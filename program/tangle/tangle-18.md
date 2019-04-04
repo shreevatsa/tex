@@ -13,7 +13,7 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The main `begin ... end` block of the Pascal program.
 
 
 <object type="image/svg+xml" data="tangle-182.svg"></object>

@@ -13,7 +13,29 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+So let's recap: in the previous section, we saw how to get a stream of non-expandable tokens out of the in-memory data structures (the `tok_mem`, `equiv` etc. arrays), by repeatedly calling `get_token`. We still need to turn this stream into the actual characters that should be output to the file.
+
+To do this, we first transform the token stream into an output buffer with its own state/queue, which in turn is periodically flushed. Can represent it as follows:
+
+
+```
+    Compact data structures --[linearized with get_token]-->  token stream --[output switch calling        ] --> out_state, out_buf ---[flush buffer]---> output_file
+                                                                            [send_out, send_val, send_sign]
+
+                       (main problem here is sequence/expansion         (main problem here is complex rules on sequence:             (main, easy, problem here
+                        of modules, macros (numeric, parametric)         what can come after what with/without spaces; also           is breaking into lines
+                        including strings.)                              accumulating integer constants)                              where allowed)
+
+```
+
+That's what the introduction to this section/part below says.
+
+It still won't make complete sense without also reading the *next* part, called “The Big Output Switch”, because in this part the functions `send_out`, `send_val`, `send_sign` are described, but only in the next part do we see in what context those functions will be called.
+
+-----
+
+
+
 
 1. We don't write directly to the output file but into an output buffer (`out_buf`) that at any time holds up to `out_buf_size = 2 * line_length` elements. This number is called `out_ptr`, so:
 
@@ -28,6 +50,9 @@ img {
 Another way of putting the last point above in context:
 
     [compact data strctures] ---(get_output)---> [linear stream of non-macro tokens] ---(send_out etc)--> [out_buf, out_state, etc] ---(flush_buffer)--> [output_file]
+
+Below, “the following solution to these problems has been adopted” should not be read as referring to just the rest of the paragraph (because it only addresses the first problem), but to section 95 as well. There are two problems Q1 and Q2 described below; the respective answers are A1 (described in last paragraph below) and A2 (described in section 95).
+
 
 <object type="image/svg+xml" data="tangle-094.svg"></object>
 
@@ -64,6 +89,8 @@ We can think of these states as keeping track of a queue of what has been seen, 
 
 - after reading `x-15+19` or after reading `x-15+19-2`: `sign_val_val`: the queue contains: (1) `-1` or `out_sign`, (2) `|out_val|`, (3) `out_app`.
 
+The variables `out_state`, `out_val`, `out_app`, `out_sign` and `last_sign` are together a way to represent this queue.
+
 It's a bit annoying that these states have been given numbers such that the values matter, but there's not much to it and it can be easily rewritten if desired (see section 106).
 
 <object type="image/svg+xml" data="tangle-096.svg"></object>
@@ -71,6 +98,8 @@ It's a bit annoying that these states have been given numbers such that the valu
 The `flush_buffer` procedure defined below has (only) two callers: one is the `check_break` macro defined below, which is called various times after printing various stuff that makes a break possible. The other is the section 98 below.
 
 <object type="image/svg+xml" data="tangle-097.svg"></object>
+
+Above, after we write out the chars, `write_ln`, and `incr(line)`, the variable `break_ptr` is how many were printed (if we haven't printed the entire buffer).
 
 Interesting that in case of error it just proceeds, having printed only part of the line.
 
@@ -81,13 +110,15 @@ This section below is the other caller of the `flush_buffer` procedure defined j
 
 <object type="image/svg+xml" data="tangle-099.svg"></object>
 
-^ Don't we need a check for `k ≥ out_ptr`? What happens if they overlap?
+^ Don't we need a check for `k ≥ out_ptr`? What happens if they overlap?
 
 <object type="image/svg+xml" data="tangle-100.svg"></object>
 
+(^ The output states, and the buffer of course, are kept up to date by...)
 
 <object type="image/svg+xml" data="tangle-101.svg"></object>
 
+Above, the `for k = 1 to v do app(out_contrib[k]))` is the main part here. But before that we need to clear the queue, which is what sections 102 to 105 below are.
 
 <object type="image/svg+xml" data="tangle-102.svg"></object>
 
@@ -100,10 +131,11 @@ This section below is the other caller of the `flush_buffer` procedure defined j
 
 <object type="image/svg+xml" data="tangle-105.svg"></object>
 
+Having dealt with the `send_out` procedure, let's look at `send_sign`.
 
 <object type="image/svg+xml" data="tangle-106.svg"></object>
 
-^Note: First line: `out_app` was ±1 (I think), so it makes sense to multiply `v` by it.
+^Note: First line: `out_app` was ±1, so it makes sense to multiply `v` by it.
 
 Question: Does `send_sign` after `unbreakable` result in the `unbreakable` getting ignored? Is this documented in the WEB manual?
 
@@ -122,5 +154,3 @@ Below: read the `bad_case` as something like `dump_case`. There's nothing “bad
 
 
 <object type="image/svg+xml" data="tangle-111.svg"></object>
-
-

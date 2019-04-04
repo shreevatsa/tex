@@ -76,13 +76,53 @@ And here are just the texts (text `i` for each `i`), without the complications o
 
 <div id="tokMemListTexts" class="areaofsanity full-width"></div>
 
-To make it even more readable, we can pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved.
+To make it even more readable, we can pair with the byte memory (the identifiers aka names), so that the "N@" and "M@" references above can be resolved. The “next” below refers to the `text_link` array.
 
 <div id="tokMemListTextsResolved" class="areaofsanity full-width"></div>
 
 If we recall that the name `0` refers to the unnamed module, we can now finally put together the “name” and “text” arrays, along with the pointers between them, namely: `equiv` points from names to (sometimes) text equivalents, and `text_link` points from one text to another (its sequel). This will make sense of most the data structures introduced in [Part 5](tangle-5) (section 38), except we don't need to care about the `link` and `ilk` arrays anymore because they are either an internal implementation detail for finding the number from the name, or contain only trivial information.
 
-Let's look at all this at the top of the next part.
-
 <script src="tangle-mem.js"></script>
 <script src="pretty-8.js"></script>
+
+    (gdb) p equiv
+    $1 = {0, 0, 0, 0, 0, 0, 0, 5, 0, 8, 0, 0, 7, 0, 9, 0, 2, 3, 4, 0, 6, 0, 1073741824, 1073742079, 0, 0, 0, 0, 0, 1073741824, 1073741837, 1073741951, 0, 0, 0, 0, 0, 15, 0, 0, 18, 21, 17, 0, 0, 1073741872, 0, 1073741921, 0, 19, 1073741918, 0, 0, 1073741858, 1073741856, 0, 1073741950, 0, 0, 0, 0, 0, 0, 51, 0, 22, 0, 0, 0, 1073741881, 0 <repeats 9931 times>}
+    (gdb) p textlink
+    $2 = {1, 16, 0, 0, 0, 10000, 0, 10000, 12, 10, 11, 14, 13, 20, 10000, 0, 10000, 0, 10000, 10000, 10000, 10000, 10000, 0 <repeats 9978 times>}
+
+----
+
+Let's summarize what we have so far:
+
+- The "bytes" of the program (names of modules, names of macros, names of identifiers, and double-quoted strings) are written into `byte_mem`, with indexes in `byte_start`.
+
+- The "tokens" of the program (the replacement text for simple and parametric macros, the replacement text for modules) are written into `tok_mem`, with indexes in `tok_start`.
+
+- We have ways of looking up either modules or identifiers (any of the others) by name.
+
+- We have the numeric equivalents (for numeric macros and double-quoted strings) and text equivalents (for simple macros, parametric macros, modules) (and the latter of these we can follow "to be continued" links for, using `text_link`).
+
+- Given a name (or when looking at the replacement text for a macro / module), we can say what type it is.
+
+Here is a visualization of some of all of this, for the memory at the end of phase one of reading POOLTYPE.web.
+
+<style>
+#namesAndEquivsDiv {
+    width: 30%;
+}
+#textsDiv {
+    width: 70%;
+}
+</style>
+<div class="full-width">
+<div class="areaofsanity">
+ <div id="listNamesAndTexts" class="hbox">
+  <div id="namesAndEquivsDiv"></div>
+  <div id="textsDiv" class="vbox"></div>
+ </div>
+</div>
+</div>
+<script>
+namesAndEquivs(document.getElementById('namesAndEquivsDiv'));
+tokMemListTextsResolved(document.getElementById('textsDiv'));
+</script>

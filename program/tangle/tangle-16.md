@@ -13,7 +13,7 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The global `module_count`, and the procedure `scan_module`.
 
 
 <object type="image/svg+xml" data="tangle-171.svg"></object>

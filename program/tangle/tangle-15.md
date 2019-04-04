@@ -13,7 +13,7 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The global `cur_repl_text`, the procedure `scan_repl` which sets it, and the procedure `define_macro`.
 
 
 <object type="image/svg+xml" data="tangle-163.svg"></object>

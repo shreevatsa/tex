@@ -98,7 +98,7 @@ So let's keep track of the total info we need to keep for each name:
 | Parametric macro name           |        ✓        |                    |                  |                   |           ✓            |                                  |     3     |
 | Pascal keywords and identifiers |                 |                    |                  |                   |           ✓            |                ✓                 |     0     |
 
-As we can see, we need to store three things for every type name. DEK's idea is that we can store them in just three arrays, as follows:
+As we can see, we need to store three things for every name, whatever kind of name it is. DEK's idea is that we can store them in just three arrays, as follows:
 
 | Type of name                    | Text equivalent | Numeric equivalent |   Tree “left” link   |  Tree “right” link  | Hash table “next” link | Secondary hash table “next” link | Type code |
 | :------------------------------ | :-------------: | :----------------: | :------------------: | :-----------------: | :--------------------: | :------------------------------: | :-------: |

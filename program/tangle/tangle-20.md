@@ -13,7 +13,9 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The indispensable index, which needs to be looked up often.
+
+Also a list of section names which I'm not sure is so useful.
 
 
 <object type="image/svg+xml" data="tangle-189.svg"></object>

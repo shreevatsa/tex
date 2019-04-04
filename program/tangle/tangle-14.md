@@ -13,7 +13,7 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+The procedure `scan_numeric`, and the global `next_control`.
 
 
 <object type="image/svg+xml" data="tangle-156.svg"></object>

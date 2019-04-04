@@ -13,7 +13,9 @@ img {
 </style>
 
 
-(TODO: Comment on these sections later.)
+Some debugging related globals, and the procedure `debug_help`.
+
+Everything in this part is def-ed out if not building with `debug`.
 
 
 <object type="image/svg+xml" data="tangle-179.svg"></object>

@@ -102,6 +102,8 @@ The "write" is further decomposed into:
 
 ## Table of contents
 
+(Note the “section” below is what is known as “module” in the program! I'll use both names interchangeably.)
+
 <object type="image/svg+xml" data="tangle-contents.svg"></object>
 
 Because of its length, let's study each part separately. The horizontal lines below group the 20 parts into what seemed natural places to me.

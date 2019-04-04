@@ -10,41 +10,7 @@ This struck me as a strange choice when I first encountered it: without saying h
 
 ----
 
-Let's summarize what we have so far:
-
-- The "bytes" of the program (names of modules, names of macros, names of identifiers, and double-quoted strings) are written into `byte_mem`, with indexes in `byte_start`.
-
-- The "tokens" of the program (the replacement text for simple and parametric macros, the replacement text for modules) are written into `tok_mem`, with indexes in `tok_start`.
-
-- We have ways of looking up either modules or identifiers (any of the others) by name.
-
-- We have the numeric equivalents (for numeric macros and double-quoted strings) and text equivalents (for simple macros, parametric macros, modules) (and the latter of these we can follow "to be continued" links for, using `text_link`).
-
-- Given a name (or when looking at the replacement text for a macro / module), we can say what type it is.
-
-Here is a visualization of some of all of this, for the memory at the end of phase one of reading POOLTYPE.web.
-
-<style>
-#namesAndEquivsDiv {
-    width: 30%;
-}
-#textsDiv {
-    width: 70%;
-}
-</style>
-<div class="full-width">
-<div class="areaofsanity">
- <div id="listNamesAndTexts" class="hbox">
-  <div id="namesAndEquivsDiv"></div>
-  <div id="textsDiv" class="vbox"></div>
- </div>
-</div>
-</div>
-<script src="tangle-mem.js"></script>
-<script>
-namesAndEquivs(document.getElementById('namesAndEquivsDiv'));
-tokMemListTextsResolved(document.getElementById('textsDiv'));
-</script>
+Go back to the visualization at the end of [the previous]({{"/program/tangle/tangle-8#listNamesAndTexts" | relative_url}}), to refresh memory.
 
 So in principle to output the entire program, this is what we'd need to do:
 
@@ -58,7 +24,9 @@ So in principle to output the entire program, this is what we'd need to do:
 
 - When you encounter a parametric macro, identify the parameter (where it begins and ends) and keep track of it, and write out the replacement text, replacing any encountered `#` with the parameter. DEK has a clever idea for doing this: to keep track of the parameter we store (copy) it as a new text, with a dummy name pointing to it. And to replace any `#` we encounter, we expand that dummy name like any other name.
 
-If we view this as a tree with every “expandable” name having its equiv as its child / children, then in effect we want to perform an in-order traversal of this tree. The `get_output` procedure that is the centrepiece of this section amounts to a “next” iterator for this in-order traversal.
+In other words, each “text”, starting with the one in `text_link[0]`, has some “expandable” tokens and some “non-expandable” ones. By imagining that we replace each expandable token with its expansion, we want to ultimately output only non-expandable tokens.
+
+In yet other words, if we view this as a tree with every “expandable” name having its equiv as its child / children, then in effect we want to perform an in-order traversal of this tree. The `get_output` procedure that is the centrepiece of this section amounts to a “next” iterator for this in-order traversal: calling it repeatedly gives the non-expandable tokens one-by-one.
 
 -----
 
@@ -106,8 +74,19 @@ Read this procedure `pop_level(p)` as: “end reading current replacement text�
 <object type="image/svg+xml" data="tangle-085.svg"></object>
 
 
+This `get_output` function is the heart of this section. Can read it as “get next non-macro token”, i.e. “get the next non-expandable token”.
+
 <object type="image/svg+xml" data="tangle-086.svg"></object>
 
+As mentioned above, this is what `get_output` does:
+
+- For a non-expandable token `t` (a one-byte token, either a literal char or one of the special tokens like `left_arrow` standing for `:=`), returns `t` itself (`0 ≤ t ≤ 127`).
+
+- For a numeric macro, with value (equiv) `n`, returns 128, and sets `cur_val` to `n`.
+
+- For a reference to a module `m`, or having just reached the end of the text a module `m`, returns 129, and sets `cur_val` to `m` or `-m` respectively.
+
+- For a reference to an identifier `i`, returns 130, and sets `cur_val` to `i`.
 
 <object type="image/svg+xml" data="tangle-087.svg"></object>
 
@@ -115,7 +94,11 @@ The cases are:
 
  * base case / terminal case: if we've reached the end (of everything), return 0.
 
- * if we've reached the end of *current* text, `pop_level` (and return `{:module_number}` if necessary).
+ * if we've reached the end of *current* text, call `pop_level` (note that `pop_level` may actually stay on the same level, if there's a `text_link` to follow) and then either 
+
+   - if the text that just ended is the replacement text of a macro, continue as if nothing happened (i.e. continue looking for the next token to output), or 
+
+   - if the text that just ended is a module, return `{:module_number}`.
 
  * Most common case: read the next token, (if it's a macro act on it), and return it.
 

@@ -12,8 +12,15 @@ img {
 }
 </style>
 
+At a high-level, this part/chapter contains the following that are used outside this part:
 
-(TODO: Comment on these sections later.)
+- Globals defined here and used outside this section: `line`, `limit`, `loc` related to the current line number, its length, and how much of it has been read,
+
+- Procedure `get_line`, which puts the next line (from either the WEB file or the .ch changefile) into `buffer` (and updates `limit` etc).
+
+- Function `control_code`, which translates from occurrences of `@*` in the input (for various values of `*`) to corresponding tokens(?)
+
+- Function `skip_ahead` and procedure `skip_comment`, which find the next control code and skip to end of comment, respectively.
 
 
 <object type="image/svg+xml" data="tangle-123.svg"></object>
@@ -30,6 +37,13 @@ img {
 
 <object type="image/svg+xml" data="tangle-127.svg"></object>
 
+Below,
+
+- the module name “Skip over comment lines in the change file...” can be read as “Look in the change file until finding a line starting with `@x`”.
+
+- the module name “Skip to the next nonblank line...” can be read as “Look in the change file for the first nonblank line following the current line that starts with `@x`”.
+
+- the module “Move `buffer` and `limit` to `change_buffer` and `change_limit`” is because `input_ln` puts the just-input line and its length in those variables, but we want to keep them in `change_buffer` and `change_limit` instead.
 
 <object type="image/svg+xml" data="tangle-128.svg"></object>
 
@@ -42,6 +56,7 @@ img {
 
 <object type="image/svg+xml" data="tangle-131.svg"></object>
 
+This `check_change` below is another top-level procedure.
 
 <object type="image/svg+xml" data="tangle-132.svg"></object>
 
@@ -51,6 +66,8 @@ img {
 
 <object type="image/svg+xml" data="tangle-134.svg"></object>
 
+
+Perhaps the main procedure “exported” from this section/chapter is the `get_line` function below.
 
 <object type="image/svg+xml" data="tangle-135.svg"></object>
 
