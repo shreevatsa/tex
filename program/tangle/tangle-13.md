@@ -13,7 +13,9 @@ img {
 </style>
 
 
-The bulk of this part, sections 145 to 155 (the end), is the definition of the `get_next` function which gets the next token of input.
+This entire chapter is about the `get_next` function (defined from 145 to 155, the end), which gets the next token of input.
+
+This function produces the next token in *almost* the form that ultimately goes into the data structures (`tok_mem` etc -- what we saw in chapters 5 to 8) except that instead of two-byte tokens for identifiers, module names and module numbers, it instead returns a certain special one-byte value and then other procedures (which?) turn them into the actual two-byte tokens.
 
 
 <object type="image/svg+xml" data="tangle-143.svg"></object>

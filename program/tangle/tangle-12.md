@@ -12,7 +12,19 @@ img {
 }
 </style>
 
-At a high-level, this part/chapter contains the following that are used outside this part:
+The main concerns of this chapter are:
+
+- (123) Mentioning the existence of `get_next` (in the next chapter), `skip_ahead`, and `skip_comment`.
+
+- (124 to 138) Merging the web file and change file
+
+- (139) Function for converting an `@&` (etc.) control code to an internal (8-bit) code
+
+- (140) Skipping ahead to the next control code
+
+- (141) When in a comment, skipping to end of comment
+
+Correspondingly, this part/chapter contains the following that are used outside this part:
 
 - Globals defined here and used outside this section: `line`, `limit`, `loc` related to the current line number, its length, and how much of it has been read,
 

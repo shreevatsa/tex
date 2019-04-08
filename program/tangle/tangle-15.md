@@ -13,7 +13,7 @@ img {
 </style>
 
 
-The global `cur_repl_text`, the procedure `scan_repl` which sets it, and the procedure `define_macro`.
+The global `cur_repl_text`, the procedure `scan_repl` which sets it, and the procedure `define_macro`. This `scan_repl` is called from "Scan the Pascal part of the current module" (175), which is part of procedure `scan_module` (172).
 
 
 <object type="image/svg+xml" data="tangle-163.svg"></object>

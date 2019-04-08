@@ -13,7 +13,7 @@ img {
 </style>
 
 
-The procedure `scan_numeric`, and the global `next_control`.
+The procedure `scan_numeric`, and the global `next_control`. This `scan_numeric` is called from "Scan the deﬁnition part of the current module" (173), part of procedure `scan_module` (172).
 
 
 <object type="image/svg+xml" data="tangle-156.svg"></object>

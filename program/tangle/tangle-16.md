@@ -13,7 +13,7 @@ img {
 </style>
 
 
-The global `module_count`, and the procedure `scan_module`.
+The global `module_count`, and the procedure `scan_module`. This is called in a loop from "Phase I: Read all the user’s text and compress it in `tok_mem`" (183), part of the main program (182).
 
 
 <object type="image/svg+xml" data="tangle-171.svg"></object>
