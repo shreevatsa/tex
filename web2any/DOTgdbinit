@@ -1,0 +1,41 @@
+# Save history,
+set history save on                 
+# all of it,
+set history size unlimited          
+# to common file.
+set history filename ~/.gdb_history 
+# Also save the *output* from gdb:
+# append to it instead of overwriting;
+# and use a specific file.
+set logging file ~/.gdbout 
+set logging overwrite off  
+set logging on             
+
+# Only print "<repeated n times>" if n >= this number.
+set print repeats 100   
+# Don't truncate before these many elements.
+set print elements 2000 
+# For structures, put members one-per-line with indentation.
+set print pretty on     
+
+# Leave line-wrapping to the terminal; turn off page-wrapping.
+set height unlimited
+set width unlimited 
+set pagination off  
+
+# Print full Python stack
+set python print-stack full
+
+source ~/.gdb-AsciiPrint.py
+
+define mystep
+    step
+    refresh
+end
+
+define keepstepping
+  while(1)
+    step
+  end
+end
+

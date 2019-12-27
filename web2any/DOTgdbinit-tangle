@@ -1,0 +1,12 @@
+# Not sure if this "~" actually works; may need to expand.
+cd ~/personal/tex/program/tmp/
+file ~/personal/texmf/texlive/Build/source/Work/texk/web2c/tangle
+watch phaseone
+run ~/personal/tex/program/tmp/pooltype.web
+continue
+ascii-print tokmem[3]
+
+# python
+# r = gdb.start_recording("btrace", "bts")
+# gdb.execute("continue")
+# end

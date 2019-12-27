@@ -1,3 +1,8 @@
+"""
+NOTE: I seem to have written another similar program in the other repo.
+Maybe look at that first...
+"""
+
 import sys
 from enum import Enum
 
