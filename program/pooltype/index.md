@@ -787,6 +787,10 @@ Overall, Kernighan concluded:
 
 and Knuth (in his "WEB" language) wrote a big program with nontrivial interactions with the environment, but of course not using any software written by anyone else.
 
+As an aside, consider Knuth's comments (from a draft article surveying programming languages) written in 1966 but published in 2003 as Chapter 11 of *Selected Papers on Computer Languages*:
+
+> It is almost axiomatic that no programming language can ever be optimum. Hence every programming language has some features that can be made better. (Ad infinitum, possibly getting into a loop.) There also is ample data to support the hypothesis that no designer of programming languages will ever be pleased by all the features of a language that has been designed by somebody else. Thus it is wise for an author to avoid criticizing the existing programming languages too harshly.
+
 It so happens (see [1](http://pascal-central.com/ppl/chapter4.html#Myth6), [2](http://wiki.lazarus.freepascal.org/Why_Pascal_is_Not_My_Favorite_Programming_Language)) that some of the diverging and nonstandard extensions to Pascal mentioned above have, over the passage of years, converged more-or-less, so what you may encounter under the name of “Pascal” today (2019) has fewer (though not none) of these problems. But in any case, that's irrelevant to our story as of 1980.
 
 ### The str_pool figure above
